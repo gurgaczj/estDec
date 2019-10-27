@@ -17,6 +17,21 @@ public class EstDecNode {
     EstDecNode(String item, Integer tid) {
         this.item = item;
         this.tid = tid;
+
+        counter = 0.0;
+        error = 0.0;
+
+        this.childrens = new HashSet<>();
+    }
+
+    public EstDecNode(String item, Integer k, double count) {
+        this.item = item;
+        this.tid = k;
+        this.counter = count;
+
+        //TODO: calculate error
+        this.error = 0.0;
+
         this.childrens = new HashSet<>();
     }
 
@@ -29,8 +44,13 @@ public class EstDecNode {
     }
 
 
-    public HashSet<EstDecNode> getChildrens() {
+    HashSet<EstDecNode> getChildrens() {
         return childrens;
+    }
+
+    EstDecNode addChild(EstDecNode child){
+        getChildrens().add(child);
+        return child;
     }
 
     String getItem() {
@@ -41,7 +61,7 @@ public class EstDecNode {
         this.item = item;
     }
 
-    public void updateCount(Double d, Integer k) {
+    void updateCount(Double d, Integer k) {
         counter = counter * toThePowerOf(d, k - tid) + 1;
         error = error * toThePowerOf(d, k - tid);
         tid = k;
@@ -51,8 +71,8 @@ public class EstDecNode {
         return counter / Dk;
     }
 
-    Double toThePowerOf(Double d, Integer exponent){
-        return Math.pow(d, exponent);
+    private Double toThePowerOf(Double base, Integer exponent){
+        return Math.pow(base, exponent);
     }
 
     public Double getCounter() {
