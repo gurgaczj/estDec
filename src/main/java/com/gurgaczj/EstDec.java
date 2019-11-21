@@ -29,7 +29,8 @@ public class EstDec {
 //            // delayed-insertion phase; no filtering
 //            estDecTree.insertItemSet(transaction);
 //        }
-        estDecTree.updateParams(transaction);
+        estDecTree.updateParam();
+        estDecTree.updateCount(transaction);
         estDecTree.insertItemSet(estDecTree.getRoot(), transaction, 0);
     }
 

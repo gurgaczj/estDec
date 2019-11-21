@@ -48,6 +48,7 @@ public class EstDecTree {
      */
     void setDecayRate(Double b, Double h) {
         d = Math.pow(b, -1 / h);
+        System.out.println("d="+d);
     }
 
     Hashtable<Double, String[]> createFrequentItemSets(EstDecNode parentNode, String[] itemSet, Hashtable<Double, String[]> frequentItemSets) {
@@ -67,13 +68,17 @@ public class EstDecTree {
         return frequentItemSets;
     }
 
+    void updateParam(){
+        this.Dk = Dk * d + 1;
+        this.k++;
+    }
+
     /**
      * @param itemSet
      */
-    boolean updateParams(String[] itemSet) {
+    boolean updateCount(String[] itemSet) {
         // parameter updating phase
-        Dk = Dk * d + 1;
-        k++;
+
 
         EstDecNode currentNode = getRoot();
 
@@ -83,10 +88,10 @@ public class EstDecTree {
                 //itemSet do not exist in ML, skipping
                 return true;
             }
-            tempNode.updateCount(d, k);
+            tempNode.updateCount(this.d, this.k);
 
             // pruning
-            if (tempNode.calculateSupport(Dk) < sprn && itemSet.length > 1) {
+            if (tempNode.calculateSupport(this.Dk) < this.sprn && itemSet.length > 1) {
                 currentNode.getChildrens().remove(tempNode);
                 return false;
             }
@@ -115,7 +120,7 @@ public class EstDecTree {
                     currentNode = currentNode.addChild(new EstDecNode(item, k));
                 } else { // itemSet.length != 1
                     double count = estimateCount(itemSet, 0);
-                    if (calculateSupport(count) >= sins) {
+                    if (calculateSupport(count) >= this.sins) {
                         currentNode = currentNode.addChild(new EstDecNode(item, k, count));
                     }
                 }
@@ -146,7 +151,7 @@ public class EstDecTree {
     }
 
     private double calculateSupport(double count) {
-        return count / Dk;
+        return count / this.Dk;
     }
 
     /**
@@ -176,7 +181,7 @@ public class EstDecTree {
     }
 
     private double calculateDk(int length) {
-        return (1 - Math.pow(d, length)) / (1 - d);
+        return (1 - Math.pow(d, k - length)) / (1 - d);
     }
 
     private double calculateMaxCountBeforeSubsets(int length) {
