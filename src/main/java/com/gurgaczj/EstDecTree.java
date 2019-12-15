@@ -1,20 +1,22 @@
 package com.gurgaczj;
 
+import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Hashtable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class EstDecTree {
 
     private static final Logger logger = LogManager.getLogger("EstDecTree");
 
-    private Double d; // decay rate
-    private Double Dk; // |D|k
+    private double d; // decay rate
+    private double Dk; // |D|k
     private Integer k; // actual transaction id
-    private final Double smin; // minimum Support
-    private final Double sins; // Sins
-    private final Double sprn;
+    private final double smin; // minimum Support
+    private final double sins; // Sins
+    private final double sprn;
 
     private EstDecNode root;
 
@@ -48,7 +50,7 @@ public class EstDecTree {
      */
     void setDecayRate(Double b, Double h) {
         d = Math.pow(b, -1 / h);
-        System.out.println("d="+d);
+        System.out.println("d=" + d);
     }
 
     Hashtable<Double, String[]> createFrequentItemSets(EstDecNode parentNode, String[] itemSet, Hashtable<Double, String[]> frequentItemSets) {
@@ -68,7 +70,8 @@ public class EstDecTree {
         return frequentItemSets;
     }
 
-    void updateParam(){
+    void updateParam() {
+        // parameter updating phase
         this.Dk = Dk * d + 1;
         this.k++;
     }
@@ -76,58 +79,39 @@ public class EstDecTree {
     /**
      * @param itemSet
      */
-    boolean updateCount(String[] itemSet) {
-        // parameter updating phase
-
-
+    void updateCount(String[] itemSet) {
+        //count updating phase
         EstDecNode currentNode = getRoot();
-
+        int i = 1;
         for (String item : itemSet) {
             EstDecNode tempNode = currentNode.getChildNodeByItem(item);
             if (tempNode == null) {
                 //itemSet do not exist in ML, skipping
-                return true;
+                return;
             }
-            tempNode.updateCount(this.d, this.k);
-
+            if (tempNode.getItem().equals(itemSet[itemSet.length - 1])) {
+                tempNode.updateCount(d, k);
+            }
+            //tempNode.updateCount(this.d, this.k);
             // pruning
-            if (tempNode.calculateSupport(this.Dk) < this.sprn && itemSet.length > 1) {
+
+            if (tempNode.calculateSupport(Dk) < sprn && itemSet.length > 1) {
+                System.out.println("Pruning dla " + tempNode.getItem());
                 currentNode.getChildrens().remove(tempNode);
-                return false;
+                return;
             }
             currentNode = tempNode;
+            i++;
         }
-        return false;
     }
 
     /**
      * Inserts ItemSet to monitoring lattice (ML)
      *
+     * @param node
      * @param itemSet
+     * @param index
      */
-    public void insertItemSet(String[] itemSet) {
-
-        EstDecNode currentNode = getRoot();
-        //double count = estimateCount(itemSet, 0);
-        //double calculatedSupport = calculateSupport(count);
-
-        for (String item : itemSet) {
-            EstDecNode tempNode = currentNode.getChildNodeByItem(item);
-            if (tempNode != null) {
-                currentNode = tempNode;
-            } else { // tempNode == null
-                if (itemSet.length == 1) {
-                    currentNode = currentNode.addChild(new EstDecNode(item, k));
-                } else { // itemSet.length != 1
-                    double count = estimateCount(itemSet, 0);
-                    if (calculateSupport(count) >= this.sins) {
-                        currentNode = currentNode.addChild(new EstDecNode(item, k, count));
-                    }
-                }
-            }
-        }
-    }
-
     public void insertItemSet(EstDecNode node, String[] itemSet, int index) {
         if (index == itemSet.length) {
             return;
@@ -136,18 +120,40 @@ public class EstDecTree {
         EstDecNode newNode;
         if (childNode == null) {
             if (itemSet.length == 1) {
-                newNode = node.addChild(new EstDecNode(itemSet[index], k, 0));
+                newNode = node.addChild(new EstDecNode(itemSet[index], k, 1));
                 insertItemSet(newNode, itemSet, ++index);
             } else { // itemSet.length != 1
-                double count = estimateCount(itemSet, 0);
-                if (calculateSupport(count) >= sins) {
-                    newNode = node.addChild(new EstDecNode(itemSet[index], k, count));
+                double cMax = estimateCMax(itemSet, 0);
+                if (calculateSupport(cMax) >= sins) {
+                    double cMin = estimateCMin(itemSet);
+                    newNode = node.addChild(new EstDecNode(itemSet[index], k, cMax, cMin));
                     insertItemSet(newNode, itemSet, ++index);
                 }
             }
         } else {
             insertItemSet(childNode, itemSet, ++index);
         }
+    }
+
+    private double estimateCMin(String[] itemSet) {
+        List<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(itemSet))).stream()
+                .filter(strings -> strings.size() != 0 && strings.size() == itemSet.length - 1)
+                .collect(Collectors.toList());
+        Map<Set<String>, Set<String>> distinctPairs = getDistinctPairs(powerSet);
+        distinctPairs.forEach((strings, strings2) ->
+                System.out.println(strings + " - " + strings2));
+        double cMin = 0;
+        return 0;
+    }
+
+    private Map<Set<String>, Set<String>> getDistinctPairs(List<Set<String>> powerSet) {
+        Map<Set<String>, Set<String>> distinctPairs = new LinkedHashMap<>();
+        for(int i = 0; i < powerSet.size(); i++){
+            for(int j = i + 1; j < powerSet.size(); j++){
+                distinctPairs.put(powerSet.get(i), powerSet.get(j));
+            }
+        }
+        return distinctPairs;
     }
 
     private double calculateSupport(double count) {
@@ -161,7 +167,7 @@ public class EstDecTree {
      * @param index
      * @return
      */
-    private double estimateCount(String[] itemSet, int index) {
+    private double estimateCMax(String[] itemSet, int index) {
         double cMax = Double.MAX_VALUE;
         for (int i = 0; i < itemSet.length; i++) {
             double count = getItemSetCountWithoutItemAtIndex(itemSet, i);
@@ -219,18 +225,6 @@ public class EstDecTree {
     }
 
     /**
-     * Adds item to node
-     *
-     * @param item
-     * @param k
-     * @param node
-     * @return
-     */
-    public EstDecNode addItemToNode(String item, int k, EstDecNode node) {
-        return node.addChild(new EstDecNode(item, k));
-    }
-
-    /**
      * Return true if given item exists in given node. False otherwise.
      *
      * @param item
@@ -249,7 +243,7 @@ public class EstDecTree {
         return root;
     }
 
-    public Double getD() {
+    public double getD() {
         return d;
     }
 
@@ -257,7 +251,7 @@ public class EstDecTree {
         this.d = d;
     }
 
-    public Double getDk() {
+    public double getDk() {
         return Dk;
     }
 
@@ -273,15 +267,15 @@ public class EstDecTree {
         this.k = k;
     }
 
-    public Double getMinSupport() {
+    public double getMinSupport() {
         return smin;
     }
 
-    public Double getDelayedInsertionThreshold() {
+    public double getDelayedInsertionThreshold() {
         return sins;
     }
 
-    public Double getPruningThreshold() {
+    public double getPruningThreshold() {
         return sprn;
     }
 
@@ -289,15 +283,15 @@ public class EstDecTree {
         this.root = root;
     }
 
-    public Double getSmin() {
+    public double getSmin() {
         return smin;
     }
 
-    public Double getSins() {
+    public double getSins() {
         return sins;
     }
 
-    public Double getSprn() {
+    public double getSprn() {
         return sprn;
     }
 }

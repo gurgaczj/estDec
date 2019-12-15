@@ -4,6 +4,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class EstDec {
@@ -23,15 +24,12 @@ public class EstDec {
         estDecTree.setDecayRate(b, h);
     }
 
-    public void processTransaction(String... transaction) {
-        // parameter and count updating phase
-//        if(estDecTree.updateParams(transaction)){
-//            // delayed-insertion phase; no filtering
-//            estDecTree.insertItemSet(transaction);
-//        }
+    public void processTransaction(List<String[]> transaction) {
         estDecTree.updateParam();
-        estDecTree.updateCount(transaction);
-        estDecTree.insertItemSet(estDecTree.getRoot(), transaction, 0);
+        transaction.forEach(itemSet -> {
+        estDecTree.updateCount(itemSet);
+        estDecTree.insertItemSet(estDecTree.getRoot(), itemSet, 0);
+        });
     }
 
     public LinkedHashMultimap<Double, String[]> buildFrequentItemSets() {
@@ -54,7 +52,7 @@ public class EstDec {
 
 
     private Multimap<? extends Double, ? extends String[]> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, LinkedHashMultimap<Double, String[]> itemsSet) {
-        estDecNode.updateCount(estDecTree.getD(), estDecTree.getK());
+        estDecNode.updateCountForSelectionPhase(estDecTree.getD(), estDecTree.getK());
         double support = estDecNode.calculateSupport(estDecTree.getDk());
         if(support < estDecTree.getSmin()){
             return itemsSet;
