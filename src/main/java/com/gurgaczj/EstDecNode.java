@@ -1,17 +1,17 @@
 package com.gurgaczj;
 
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 public class EstDecNode {
 
     private String item;
-    private HashSet<EstDecNode> childrens;
+    private LinkedHashMap<String, EstDecNode> childrens;
     private Integer mrtid;
     private Double counter;
     private Double error;
 
     EstDecNode() {
-        this.childrens = new HashSet<>();
+        this.childrens = new LinkedHashMap<>();
     }
 
     EstDecNode(String item, Integer mrtid, double cMax) {
@@ -21,7 +21,7 @@ public class EstDecNode {
         this.counter = cMax;
         this.error = 0.0;
 
-        this.childrens = new HashSet<>();
+        this.childrens = new LinkedHashMap<>();
     }
 
     public EstDecNode(String item, Integer k, double cMax, double cMin) {
@@ -31,24 +31,30 @@ public class EstDecNode {
 
         this.error = cMax - cMin;
 
-        this.childrens = new HashSet<>();
+        this.childrens = new LinkedHashMap<>();
     }
 
     EstDecNode getChildNodeByItem(String item){
         if(childrens.isEmpty()){
             return null;
         }
-
-        return childrens.stream().filter(estDecNode -> estDecNode.getItem().equals(item)).findFirst().orElse(null);
+        return childrens.get(item);
+//        for(EstDecNode childNode : getChildrens()){
+//            if(childNode.getItem().equals(item)){
+//                return childNode;
+//            }
+//        }
+//        return null;
+//        return childrens.stream().filter(estDecNode -> estDecNode.getItem().equals(item)).findFirst().orElse(null);
     }
 
 
-    HashSet<EstDecNode> getChildrens() {
+    LinkedHashMap<String, EstDecNode> getChildrens() {
         return childrens;
     }
 
     EstDecNode addChild(EstDecNode child){
-        getChildrens().add(child);
+        getChildrens().put(child.item, child);
         return child;
     }
 
@@ -84,7 +90,7 @@ public class EstDecNode {
         return error;
     }
 
-    public void setChildrens(HashSet<EstDecNode> childrens) {
+    public void setChildrens(LinkedHashMap<String, EstDecNode> childrens) {
         this.childrens = childrens;
     }
 

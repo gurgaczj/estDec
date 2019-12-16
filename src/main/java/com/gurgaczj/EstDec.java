@@ -39,12 +39,13 @@ public class EstDec {
         //Hashtable<Double, String[]> frequentItemSets = estDecTree.createFrequentItemSets(estDecTree.getRoot(), new String[0], new Hashtable<Double, String[]>());
 
         LinkedHashMultimap<Double , String[]> itemSetsSet = LinkedHashMultimap.create();
-        Set<FrequentItemset> frequentItemsets = new LinkedHashSet<>();
-        for (EstDecNode estDecNode : root.getChildrens()) {
-            frequentItemsets.addAll(recursiveItemSetBuilding(estDecNode, new String[0], frequentItemsets));
+        Set<FrequentItemset> frequentItemsets2 = new HashSet<>();
+        ArrayDeque<FrequentItemset> frequentItemsets = new ArrayDeque<>();
+        for (Map.Entry<String, EstDecNode> estDecNode : root.getChildrens().entrySet()) {
+            frequentItemsets.addAll(recursiveItemSetBuilding(estDecNode.getValue(), new String[0], frequentItemsets2));
         }
 
-        return frequentItemsets;
+        return frequentItemsets2;
     }
 
 
@@ -55,30 +56,31 @@ public class EstDec {
         if(support < estDecTree.getSmin()){
             return itemsSet;
         }
-        String[] tempItems = new String[items.length + 1];
-        System.arraycopy(items, 0, tempItems, 0, items.length);
-        tempItems[items.length] = estDecNode.getItem();
+        int itemsetSize = items.length;
+        String[] tempItems = new String[itemsetSize + 1];
+        System.arraycopy(items, 0, tempItems, 0, itemsetSize);
+        tempItems[itemsetSize] = estDecNode.getItem();
         itemsSet.add(new FrequentItemset(support, tempItems, estDecNode.getError()));
         if (estDecNode.getChildrens().isEmpty()) {
             //itemsSet.add(tempItems);
             return itemsSet;
         }
-        for (EstDecNode childNode : estDecNode.getChildrens()) {
-            itemsSet.addAll(recursiveItemSetBuilding(childNode, tempItems, itemsSet));
+        for (Map.Entry<String, EstDecNode> childNode : estDecNode.getChildrens().entrySet()) {
+            itemsSet.addAll(recursiveItemSetBuilding(childNode.getValue(), tempItems, itemsSet));
         }
         return itemsSet;
     }
 
-    private Set<String[]> getAllItemSetsFromNode(EstDecNode node, HashSet<String[]> itemSets) {
-        String[] itemArray = new String[1];
-        HashSet<EstDecNode> nodeChilds = node.getChildrens();
-        if (!nodeChilds.isEmpty()) {
-            for (EstDecNode estDecNode : nodeChilds) {
-                estDecNode.getItem();
-            }
-        }
-        return null;
-    }
+//    private Set<String[]> getAllItemSetsFromNode(EstDecNode node, HashSet<String[]> itemSets) {
+//        String[] itemArray = new String[1];
+//        HashSet<EstDecNode> nodeChilds = node.getChildrens();
+//        if (!nodeChilds.isEmpty()) {
+//            for (EstDecNode estDecNode : nodeChilds) {
+//                estDecNode.getItem();
+//            }
+//        }
+//        return null;
+//    }
 
 
     // for testing purposes

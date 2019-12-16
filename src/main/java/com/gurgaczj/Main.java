@@ -1,27 +1,30 @@
 package com.gurgaczj;
 
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Sets;
 
+import java.io.*;
 import java.math.BigDecimal;
+import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Main {
 
     public static void main(String[] args) {
+
+
+
         System.out.println("Start: " + LocalDateTime.now().toString() + "\n");
         Set<String[]> itemSets = new LinkedHashSet<>();
         itemSets.add(new String[]{"1", "2"});
         itemSets.add(new String[]{"2", "4"});
         itemSets.add(new String[]{"2", "4"});
-        itemSets.add(new String[]{"12", "24", "36"});
-        itemSets.add(new String[]{"12", "24", "36"});
-        itemSets.add(new String[]{"12", "24", "36"});
-        itemSets.add(new String[]{"12", "24", "36"});
-        itemSets.add(new String[]{"2", "4"});
+//        itemSets.add(new String[]{"12", "24", "36"});
+//        itemSets.add(new String[]{"12", "24", "36"});
+//        itemSets.add(new String[]{"12", "24", "36"});
+//        itemSets.add(new String[]{"12", "24", "36"});
+//        itemSets.add(new String[]{"2", "4"});
 
 
         String[] words = new String[]{"amet", "consectetur", "adipiscing"};
@@ -33,13 +36,15 @@ public class Main {
         int percentageSins = 10;
         int percentageSprn = 10;
 
-        double smin = 0.1;
+        double smin = 0.05;
         double sins = smin * (percentageSins / 100.0);
         double sprn = smin * (percentageSprn / 100.0);
         System.out.println("sins = " + new BigDecimal(sins).toString() + ", sprn = " + new BigDecimal(sprn).toString());
 
         EstDec algorithm = new EstDec(smin, sins, sprn);
         algorithm.setDecayRate(2, 10000);
+
+        System.out.println("Czas rozpoczęcia wstawiania " + LocalDateTime.now().toString().replace("T", " "));
 
         itemSets.forEach(strings -> {
             Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(strings)));
@@ -50,12 +55,36 @@ public class Main {
             algorithm.processTransaction(transaction);
         });
 
-
-
-        // finding frequent itemsets from monitoring lattice
+        File file = new File("C:\\Users\\vandemos\\Desktop\\file.txt");
+        try {
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            int data = 0;
+            String line;
+            while((line = bufferedReader.readLine()) != null){
+                Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(line.split(" "))));
+                List<String[]> transaction = powerSet.stream()
+                        .filter(set -> set.size() != 0)
+                        .map(strings1 -> strings1.toArray(new String[0]))
+                        .collect(Collectors.toList());
+                algorithm.processTransaction(transaction);
+                data++;
+                //System.out.println(data);
+            }
+            System.out.println("Czas zakończenia wstawiania " + LocalDateTime.now().toString().replace("T", " "));
+            System.out.println("Ilość Danych = " + data);
+            bufferedReader.close();
+            fileReader.close();
+            file = null;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // finding frequent itemsets in monitoring lattice
         Set<FrequentItemset> frequentItemSets = algorithm.buildFrequentItemSets();
         List<FrequentItemset> sorted = frequentItemSets.stream().sorted((fi1, fi2) -> fi2.getCount().compareTo(fi1.getCount())).collect(Collectors.toList());
-        if (sorted == null) {
+        if (sorted.size() == 0) {
             System.out.println("No frequent itemsets");
         } else {
             sorted.forEach(System.out::println);
