@@ -12,12 +12,16 @@ import java.util.stream.Collectors;
 public class Main {
 
     public static void main(String[] args) {
-
+        System.out.println("Start: " + LocalDateTime.now().toString() + "\n");
         Set<String[]> itemSets = new LinkedHashSet<>();
         itemSets.add(new String[]{"1", "2"});
         itemSets.add(new String[]{"2", "4"});
         itemSets.add(new String[]{"2", "4"});
         itemSets.add(new String[]{"12", "24", "36"});
+        itemSets.add(new String[]{"12", "24", "36"});
+        itemSets.add(new String[]{"12", "24", "36"});
+        itemSets.add(new String[]{"12", "24", "36"});
+        itemSets.add(new String[]{"2", "4"});
 
 
         String[] words = new String[]{"amet", "consectetur", "adipiscing"};
@@ -29,7 +33,7 @@ public class Main {
         int percentageSins = 10;
         int percentageSprn = 10;
 
-        double smin = 0.5;
+        double smin = 0.1;
         double sins = smin * (percentageSins / 100.0);
         double sprn = smin * (percentageSprn / 100.0);
         System.out.println("sins = " + new BigDecimal(sins).toString() + ", sprn = " + new BigDecimal(sprn).toString());
@@ -46,24 +50,15 @@ public class Main {
             algorithm.processTransaction(transaction);
         });
 
-        System.out.println("Start: " + LocalDateTime.now().toString() + "\n");
+
 
         // finding frequent itemsets from monitoring lattice
-        LinkedHashMultimap<Double, String[]> frequentItemSets = algorithm.buildFrequentItemSets();
-        if (frequentItemSets == null) {
+        Set<FrequentItemset> frequentItemSets = algorithm.buildFrequentItemSets();
+        List<FrequentItemset> sorted = frequentItemSets.stream().sorted((fi1, fi2) -> fi2.getCount().compareTo(fi1.getCount())).collect(Collectors.toList());
+        if (sorted == null) {
             System.out.println("No frequent itemsets");
         } else {
-            frequentItemSets.forEach((aDouble, strings) -> {
-                StringBuilder frequentItemSet = new StringBuilder("Itemset support: ");
-                frequentItemSet.append(aDouble);
-                frequentItemSet.append(", items: ");
-                for (int i = 0; i < strings.length; i++) {
-                    frequentItemSet.append(strings[i]);
-                    frequentItemSet.append(", ");
-                }
-                System.out.println(frequentItemSet.toString());
-            });
-            System.out.println("Size of set of frequent itemsets: " + frequentItemSets.size());
+            sorted.forEach(System.out::println);
         }
 
         System.out.println("\nKoniec: " + LocalDateTime.now().toString());

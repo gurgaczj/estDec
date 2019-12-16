@@ -18,8 +18,8 @@ public class EstDecNode {
         this.item = item;
         this.mrtid = mrtid;
 
-        counter = cMax;
-        error = 0.0;
+        this.counter = cMax;
+        this.error = 0.0;
 
         this.childrens = new HashSet<>();
     }

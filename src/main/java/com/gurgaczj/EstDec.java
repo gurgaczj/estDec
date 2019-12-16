@@ -1,11 +1,8 @@
 package com.gurgaczj;
 
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EstDec {
 
@@ -32,7 +29,7 @@ public class EstDec {
         });
     }
 
-    public LinkedHashMultimap<Double, String[]> buildFrequentItemSets() {
+    public Set<FrequentItemset> buildFrequentItemSets() {
         EstDecNode root = getRootNode();
 
         if (root.getChildrens().isEmpty()) {
@@ -42,16 +39,17 @@ public class EstDec {
         //Hashtable<Double, String[]> frequentItemSets = estDecTree.createFrequentItemSets(estDecTree.getRoot(), new String[0], new Hashtable<Double, String[]>());
 
         LinkedHashMultimap<Double , String[]> itemSetsSet = LinkedHashMultimap.create();
+        Set<FrequentItemset> frequentItemsets = new LinkedHashSet<>();
         for (EstDecNode estDecNode : root.getChildrens()) {
-            itemSetsSet.putAll(recursiveItemSetBuilding(estDecNode, new String[0], itemSetsSet));
+            frequentItemsets.addAll(recursiveItemSetBuilding(estDecNode, new String[0], frequentItemsets));
         }
 
-        return itemSetsSet;
+        return frequentItemsets;
     }
 
 
 
-    private Multimap<? extends Double, ? extends String[]> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, LinkedHashMultimap<Double, String[]> itemsSet) {
+    private Set<FrequentItemset> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, Set<FrequentItemset> itemsSet) {
         estDecNode.updateCountForSelectionPhase(estDecTree.getD(), estDecTree.getK());
         double support = estDecNode.calculateSupport(estDecTree.getDk());
         if(support < estDecTree.getSmin()){
@@ -60,13 +58,13 @@ public class EstDec {
         String[] tempItems = new String[items.length + 1];
         System.arraycopy(items, 0, tempItems, 0, items.length);
         tempItems[items.length] = estDecNode.getItem();
-        itemsSet.put(support, tempItems);
+        itemsSet.add(new FrequentItemset(support, tempItems, estDecNode.getError()));
         if (estDecNode.getChildrens().isEmpty()) {
             //itemsSet.add(tempItems);
             return itemsSet;
         }
         for (EstDecNode childNode : estDecNode.getChildrens()) {
-            itemsSet.putAll(recursiveItemSetBuilding(childNode, tempItems, itemsSet));
+            itemsSet.addAll(recursiveItemSetBuilding(childNode, tempItems, itemsSet));
         }
         return itemsSet;
     }

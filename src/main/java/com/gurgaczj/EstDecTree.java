@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.print.attribute.SetOfIntegerSyntax;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -123,9 +124,18 @@ public class EstDecTree {
                 newNode = node.addChild(new EstDecNode(itemSet[index], k, 1));
                 insertItemSet(newNode, itemSet, ++index);
             } else { // itemSet.length != 1
+//                System.out.print("[");
+//                for(int i = 0; i < itemSet.length; i++){
+//                    if(i == itemSet.length - 1){
+//                        System.out.print(itemSet[i] + "]\n");
+//                    }
+//                    System.out.print(itemSet[i] + ", ");
+//                }
                 double cMax = estimateCMax(itemSet, 0);
                 if (calculateSupport(cMax) >= sins) {
                     double cMin = estimateCMin(itemSet);
+//                    System.out.println(Sets.newLinkedHashSet(Arrays.asList(itemSet)) + ", cmin = " + cMin
+//                            + ", cmax = " + cMax + ", cmax - cmin = " + (cMax - cMin));
                     newNode = node.addChild(new EstDecNode(itemSet[index], k, cMax, cMin));
                     insertItemSet(newNode, itemSet, ++index);
                 }
@@ -140,16 +150,50 @@ public class EstDecTree {
                 .filter(strings -> strings.size() != 0 && strings.size() == itemSet.length - 1)
                 .collect(Collectors.toList());
         Map<Set<String>, Set<String>> distinctPairs = getDistinctPairs(powerSet);
-        distinctPairs.forEach((strings, strings2) ->
-                System.out.println(strings + " - " + strings2));
-        double cMin = 0;
-        return 0;
+
+        double cMin = 0.0;
+
+        for (Map.Entry<Set<String>, Set<String>> entry : distinctPairs.entrySet()) {
+            double countOfUnionItemset = calculateCountOfUnionItemset(entry);
+            if (countOfUnionItemset > cMin) {
+                cMin = countOfUnionItemset;
+            }
+        }
+        return cMin;
+    }
+
+    private double calculateCountOfUnionItemset(Map.Entry<Set<String>, Set<String>> entry) {
+        Sets.SetView<String> intersection = Sets.intersection(entry.getKey(), entry.getValue());
+        double e1Count = getCountOfItemset(entry.getKey().toArray(new String[0]));
+        double e2Count = getCountOfItemset(entry.getValue().toArray(new String[0]));
+        double count;
+        if (intersection.isEmpty()) {
+            count = e1Count + e2Count - getK();
+        } else {
+            double interSectionCount = getCountOfItemset(intersection.toArray(new String[0]));
+            count = e1Count + e2Count - interSectionCount;
+        }
+        return Math.max(count, 0.0);
+    }
+
+    private double getCountOfItemset(String[] itemset) {
+        EstDecNode node = getRoot();
+        for (int i = 0; i < itemset.length; i++) {
+            node = node.getChildNodeByItem(itemset[i]);
+            if (node == null) {
+                return 0.0;
+            }
+            if (i == itemset.length - 1) {
+                return node.getCounter();
+            }
+        }
+        return 0.0;
     }
 
     private Map<Set<String>, Set<String>> getDistinctPairs(List<Set<String>> powerSet) {
         Map<Set<String>, Set<String>> distinctPairs = new LinkedHashMap<>();
-        for(int i = 0; i < powerSet.size(); i++){
-            for(int j = i + 1; j < powerSet.size(); j++){
+        for (int i = 0; i < powerSet.size(); i++) {
+            for (int j = i + 1; j < powerSet.size(); j++) {
                 distinctPairs.put(powerSet.get(i), powerSet.get(j));
             }
         }
