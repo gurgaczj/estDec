@@ -1,4 +1,4 @@
-package com.gurgaczj;
+package com.gurgaczj.algorithm;
 
 import java.util.LinkedHashMap;
 
@@ -35,17 +35,7 @@ public class EstDecNode {
     }
 
     EstDecNode getChildNodeByItem(String item){
-        if(childrens.isEmpty()){
-            return null;
-        }
         return childrens.get(item);
-//        for(EstDecNode childNode : getChildrens()){
-//            if(childNode.getItem().equals(item)){
-//                return childNode;
-//            }
-//        }
-//        return null;
-//        return childrens.stream().filter(estDecNode -> estDecNode.getItem().equals(item)).findFirst().orElse(null);
     }
 
 

@@ -1,25 +1,27 @@
-package com.gurgaczj;
+package com.gurgaczj.algorithm;
 
 import java.math.BigDecimal;
 
 public class FrequentItemset {
 
-    private Double count;
+    private Double support;
     private String[] items;
+    private String itemsetString;
     private BigDecimal error;
 
-    public FrequentItemset(double count, String[] items, double error) {
-        this.count = count;
+    public FrequentItemset(double support, String[] items, double error) {
+        this.support = support;
         this.items = items;
         this.error = new BigDecimal(error);
+        this.itemsetString = toString();
     }
 
-    public Double getCount() {
-        return count;
+    public Double getSupport() {
+        return support;
     }
 
-    public void setCount(Double count) {
-        this.count = count;
+    public void setSupport(Double support) {
+        this.support = support;
     }
 
     public String[] getItems() {
@@ -38,10 +40,16 @@ public class FrequentItemset {
         this.error = error;
     }
 
+    public String getItemsetString() {
+        return itemsetString;
+    }
+
+    public void setItemsetString(String itemsetString) {
+        this.itemsetString = itemsetString;
+    }
+
     public String toString(){
-        StringBuilder frequentItemsetInfo = new StringBuilder("Frequent itemset support = ");
-        frequentItemsetInfo.append(getCount());
-        frequentItemsetInfo.append(", item set = [");
+        StringBuilder frequentItemsetInfo = new StringBuilder("[");
         for(int i = 0; i < getItems().length; i++){
             frequentItemsetInfo.append(getItems()[i]);
             if(i == getItems().length - 1){
@@ -49,8 +57,7 @@ public class FrequentItemset {
             }
             frequentItemsetInfo.append(", ");
         }
-        frequentItemsetInfo.append("], error = ");
-        frequentItemsetInfo.append(getError().toString());
+        frequentItemsetInfo.append("]");
         return frequentItemsetInfo.toString();
     }
 

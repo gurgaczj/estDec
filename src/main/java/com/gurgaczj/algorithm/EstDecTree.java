@@ -1,17 +1,11 @@
-package com.gurgaczj;
+package com.gurgaczj.algorithm;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.primitives.Floats;
-import com.google.common.primitives.Ints;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
-import org.apache.commons.collections4.PredicateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class EstDecTree {
@@ -38,7 +32,7 @@ public class EstDecTree {
         root = new EstDecNode();
     }
 
-    public EstDecTree(Double smin, Double sprn, Double sins) {
+    public EstDecTree(double smin, double sprn, double sins) {
         this.smin = smin;
         this.sins = sins;
         this.sprn = sprn;
@@ -115,13 +109,12 @@ public class EstDecTree {
     /**
      * Inserts ItemSet to monitoring lattice (ML)
      *
-     * @param node
      * @param itemSet
      * @param index
      */
-    public void insertItemSet(EstDecNode node, String[] itemSet, int index) {
+    public void insertItemSet(String[] itemSet, int index) {
         int itemSetLength = itemSet.length;
-        EstDecNode currentNode = node;
+        EstDecNode currentNode = getRoot();
         for (String s : itemSet) {
             EstDecNode childNode = currentNode.getChildNodeByItem(s);
             if (childNode == null) {
@@ -132,9 +125,8 @@ public class EstDecTree {
                     double cMax = estimateCMax(itemSet);
                     if (calculateSupport(cMax) >= sins) {
                         double cMin = estimateCMin(itemSet);
-                        currentNode = currentNode.addChild(new EstDecNode(itemSet[index], k, cMax, cMin));
+                        currentNode = currentNode.addChild(new EstDecNode(s, k, cMax, cMin));
                         index++;
-                        continue;
                     }
                 }
             } else {
@@ -142,35 +134,31 @@ public class EstDecTree {
                 currentNode = childNode;
             }
         }
-//        if (index == itemSetLength) {
-//            return;
-//        }
-//        EstDecNode childNode = node.getChildNodeByItem(itemSet[index]);
-//        EstDecNode newNode;
-//        if (childNode == null) {
-//            if (itemSetLength == 1) {
-//                newNode = node.addChild(new EstDecNode(itemSet[index], k, 1));
-//                insertItemSet(newNode, itemSet, ++index);
-//            } else {
-//                double cMax = estimateCMax(itemSet);
-//                if (calculateSupport(cMax) >= sins) {
-//                    double cMin = estimateCMin(itemSet);
-//                    newNode = node.addChild(new EstDecNode(itemSet[index], k, cMax, cMin));
-//                    insertItemSet(newNode, itemSet, ++index);
-//                }
-//            }
-//        } else {
-//            insertItemSet(childNode, itemSet, ++index);
-//        }
     }
 
     private double estimateCMin(String[] itemSet) {
-        List<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(itemSet)))
-                .stream()
-                .filter(strings -> strings.size() != 0 && strings.size() == itemSet.length - 1)
-                .collect(Collectors.toList());
+        int mSubsetLength = itemSet.length - 1;
 
-        Map<Set<String>, Set<String>> distinctPairs = getDistinctPairs(powerSet);
+        List<Set<String>> mSubsets = Collections.synchronizedList(new ArrayList<>());
+        Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(itemSet)));
+        Iterator<Set<String>> iterator = powerSet.iterator();
+        Set<String> subSet;
+        while (iterator.hasNext()){
+            subSet = iterator.next();
+            if(subSet.size() == mSubsetLength){
+                mSubsets.add(subSet);
+            }
+        }
+//        for(Set<String> set : powerSet){
+//            if(set.size() == mSubsetLength){
+//                mSubsets.add(set);
+//            }
+//        }
+//                .stream()
+//                .filter(strings -> strings.size() == itemsetLength - 1)
+//                .collect(Collectors.toList());
+
+        Map<Set<String>, Set<String>> distinctPairs = getDistinctPairs(mSubsets);
 
         double cMin = 0.0;
 
@@ -185,13 +173,13 @@ public class EstDecTree {
 
     private double calculateCountOfUnionItemset(Map.Entry<Set<String>, Set<String>> entry) {
         Sets.SetView<String> intersection = Sets.intersection(entry.getKey(), entry.getValue());
-        double e1Count = getCountOfItemset(entry.getKey().toArray(String[]::new));
-        double e2Count = getCountOfItemset(entry.getValue().toArray(String[]::new));
+        double e1Count = getCountOfItemset(entry.getKey());
+        double e2Count = getCountOfItemset(entry.getValue());
         double count;
         if (intersection.isEmpty()) {
             count = e1Count + e2Count - getK();
         } else {
-            double interSectionCount = getCountOfItemset(intersection.toArray(String[]::new));
+            double interSectionCount = getCountOfItemset(intersection);
             count = e1Count + e2Count - interSectionCount;
         }
         return Math.max(count, 0.0);
@@ -206,14 +194,27 @@ public class EstDecTree {
                 return node.getCounter();
             }
         }
-        return 0.0;
+        return 0;
     }
 
-    private Map<Set<String>, Set<String>> getDistinctPairs(List<Set<String>> powerSet) {
+    private double getCountOfItemset(Set<String> itemSet){
+        EstDecNode node = getRoot();
+        Iterator<String> iterator = itemSet.iterator();
+        String item;
+        while(iterator.hasNext()){
+            item = iterator.next();
+            node = node.getChildNodeByItem(item);
+            if(!iterator.hasNext())
+                return node.getCounter();
+        }
+        return 0;
+    }
+
+    private Map<Set<String>, Set<String>> getDistinctPairs(List<Set<String>> mSubsets) {
         Map<Set<String>, Set<String>> distinctPairs = new LinkedHashMap<>();
-        for (int i = 0; i < powerSet.size(); i++) {
-            for (int j = i + 1; j < powerSet.size(); j++) {
-                distinctPairs.put(powerSet.get(i), powerSet.get(j));
+        for (int i = 0; i < mSubsets.size(); i++) {
+            for (int j = i + 1; j < mSubsets.size(); j++) {
+                distinctPairs.put(mSubsets.get(i), mSubsets.get(j));
             }
         }
         return distinctPairs;
@@ -237,10 +238,6 @@ public class EstDecTree {
             if (count < cMax) {
                 cMax = count;
             }
-//            if (cMax == 0) {
-//                // should already return 0?
-//                break;
-//            }
         }
         double cUpper = calculateCountForSubsets(itemsetLength) + calculateMaxCountBeforeSubsets(itemsetLength);
         if (cMax > cUpper) {

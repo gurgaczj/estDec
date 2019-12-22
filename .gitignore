@@ -25,3 +25,5 @@ hs_err_pid*
 # Folders
 .idea/
 .out/
+javafx-sdk-11.0.2/
+target/

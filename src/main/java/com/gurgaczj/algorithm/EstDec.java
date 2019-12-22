@@ -1,4 +1,4 @@
-package com.gurgaczj;
+package com.gurgaczj.algorithm;
 
 import com.google.common.collect.LinkedHashMultimap;
 
@@ -13,11 +13,11 @@ public class EstDec {
     }
 
 
-    public EstDec(Double smin, Double sins, Double sprn) {
+    public EstDec(double smin, double sins, double sprn) {
         estDecTree = new EstDecTree(smin, sprn, sins);
     }
 
-    void setDecayRate(double b, double h) {
+    public void setDecayRate(double b, double h) {
         estDecTree.setDecayRate(b, h);
     }
 
@@ -25,7 +25,7 @@ public class EstDec {
         estDecTree.updateParam();
         transaction.forEach(itemSet -> {
         estDecTree.updateCount(itemSet);
-        estDecTree.insertItemSet(estDecTree.getRoot(), itemSet, 0);
+        estDecTree.insertItemSet(itemSet, 0);
         });
     }
 
@@ -52,6 +52,9 @@ public class EstDec {
 
     private Set<FrequentItemset> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, Set<FrequentItemset> itemsSet) {
         estDecNode.updateCountForSelectionPhase(estDecTree.getD(), estDecTree.getK());
+        if(estDecNode.getItem().equals("12")){
+            System.out.println("12");
+        }
         double support = estDecNode.calculateSupport(estDecTree.getDk());
         if(support < estDecTree.getSmin()){
             return itemsSet;
