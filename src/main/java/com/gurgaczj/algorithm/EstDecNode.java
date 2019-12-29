@@ -1,17 +1,21 @@
 package com.gurgaczj.algorithm;
 
+import com.google.common.collect.Maps;
+
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class EstDecNode {
 
     private String item;
-    private LinkedHashMap<String, EstDecNode> childrens;
+    private Map<String, EstDecNode> childrens;
     private Integer mrtid;
     private Double counter;
     private Double error;
 
     EstDecNode() {
-        this.childrens = new LinkedHashMap<>();
+        this.childrens = Maps.newConcurrentMap();
     }
 
     EstDecNode(String item, Integer mrtid, double cMax) {
@@ -21,7 +25,7 @@ public class EstDecNode {
         this.counter = cMax;
         this.error = 0.0;
 
-        this.childrens = new LinkedHashMap<>();
+        this.childrens = Maps.newConcurrentMap();
     }
 
     public EstDecNode(String item, Integer k, double cMax, double cMin) {
@@ -31,7 +35,7 @@ public class EstDecNode {
 
         this.error = cMax - cMin;
 
-        this.childrens = new LinkedHashMap<>();
+        this.childrens = Maps.newConcurrentMap();
     }
 
     EstDecNode getChildNodeByItem(String item){
@@ -39,7 +43,7 @@ public class EstDecNode {
     }
 
 
-    LinkedHashMap<String, EstDecNode> getChildrens() {
+    public Map<String, EstDecNode> getChildrens() {
         return childrens;
     }
 

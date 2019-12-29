@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,15 @@ public class UIController {
     private Button selectFileButton;
     @FXML
     private CheckBox countErrorBox;
+    @FXML
+    private Button mineFIButton;
+    @FXML
+    private TextArea logArea;
+    @FXML
+    private Button clearML;
 
     private EstDec algorithm;
+    private double sMin;
 
     @FXML
     public void initialize() {
@@ -51,25 +59,19 @@ public class UIController {
         hProperty.setText("10000");
         percentage.setText("10");
 
-        double smin = Double.parseDouble(sminProperty.getText());
-        double sins = smin * (Integer.parseInt(percentage.getText()) / 100.0);
-        double sprn = smin * (Integer.parseInt(percentage.getText()) / 100.0);
+        sMin = Double.parseDouble(sminProperty.getText());
+        double sins = sMin * (Integer.parseInt(percentage.getText()) / 100.0);
+        double sprn = sMin * (Integer.parseInt(percentage.getText()) / 100.0);
 
-        this.algorithm = new EstDec(smin, sins, sprn);
+        this.algorithm = new EstDec(sMin, sins, sprn);
 
         this.algorithm.setDecayRate(Double.parseDouble(bProperty.getText()), Double.parseDouble(hProperty.getText()));
 
         selectFileButton.setOnAction(event -> insertFiFromFile());
-    }
 
-    public void initEstDecAlgorithm() {
-        double smin = Double.parseDouble(sminProperty.getText());
-        double sins = smin * (Integer.parseInt(percentage.getText()) / 100.0);
-        double sprn = smin * (Integer.parseInt(percentage.getText()) / 100.0);
+        mineFIButton.setOnAction(event -> mineFis());
 
-        this.algorithm = new EstDec(smin, sins, sprn);
-
-        this.algorithm.setDecayRate(Double.parseDouble(bProperty.getText()), Double.parseDouble(hProperty.getText()));
+        clearML.setOnAction(event -> algorithm.getRootNode().getChildrens().clear());
     }
 
     private void insertFiFromFile() {
@@ -91,48 +93,38 @@ public class UIController {
         Optional<String> s = textInputDialog.showAndWait();
         if (s.isPresent()) {
             regex = s.get();
+            System.out.println("regex = #" + regex + "#");
         } else {
-            //TODO: log error
-            regex = ";";
+            appendToLogArea("Nie podano znaku podziału danych");
+            return;
         }
 
+        new Thread(() -> {
+            try {
+                FileReader fileReader = new FileReader(csv);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                String line;
+                int i = 1;
+                while ((line = bufferedReader.readLine()) != null) {
 
-        try {
-            FileReader fileReader = new FileReader(csv);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line;
-            int i = 1;
-            while ((line = bufferedReader.readLine()) != null) {
-
-                String[] transaction = line.split(regex);
-                Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
-                List<String[]> filteredPowerSet = powerSet.stream()
-                        .filter(set -> set.size() != 0)
-                        .map(strings1 -> strings1.toArray(new String[0]))
-                        .collect(Collectors.toList());
-                algorithm.processTransaction(filteredPowerSet);
-
-                if (i % 10 == 0) {
-                    Set<Set<String>> powerSe2t = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList("12", "24", "36")));
-                    powerSe2t.forEach(System.out::println);
-                    List<String[]> filteredPowerSet2 = powerSe2t.stream()
+                    String[] transaction = line.split(regex);
+                    Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
+                    List<String[]> filteredPowerSet = powerSet.stream()
                             .filter(set -> set.size() != 0)
-                            .map(strings1 -> strings1.toArray(new String[0]))
+                            .map(strings1 -> strings1.toArray(new String[strings1.size()]))
                             .collect(Collectors.toList());
-                    algorithm.processTransaction(filteredPowerSet2);
+                    algorithm.processTransaction(filteredPowerSet);
+
+                    i++;
+                    if (i % 10000 == 0) {
+                        System.out.println(i);
+                    }
                 }
-
-                i++;
+            } catch (IOException e) {
+                e.printStackTrace();
+                appendToLogArea("Błąd podczas odczytywania pliku");
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            //TODO: log error
-        } catch (IOException e) {
-            e.printStackTrace();
-            //TODO: log error
-        }
-
-        System.gc();
+        }).start();
 
 //        Set<String[]> transactions = new LinkedHashSet<>();
 //        transactions.add(new String[]{"1", "2"});
@@ -157,18 +149,30 @@ public class UIController {
 //                    .collect(Collectors.toList());
 //            algorithm.processTransaction(filteredPowerSet);
 //        }
-
-        mineFis();
     }
 
     private void mineFis() {
+        fiTable.getItems().clear();
         new Thread(() -> {
-            fiTable.getItems().clear();
+            System.out.println(algorithm.getD() + " --- " + algorithm.getK() + " --- " + algorithm.getDk() + " --- " + sMin);
             Set<FrequentItemset> frequentItemSets = algorithm.buildFrequentItemSets();
+
+            if (frequentItemSets.isEmpty()) {
+                //TODO: log error
+                appendToLogArea("Brak zbiorów częstych");
+                return;
+            }
             List<FrequentItemset> sorted = frequentItemSets.stream().sorted((fi1, fi2) -> fi2.getSupport().compareTo(fi1.getSupport())).collect(Collectors.toList());
             frequentItemSets.clear();
+            frequentItemSets = null;
             fiTable.getItems().addAll(sorted);
-            initEstDecAlgorithm();
+            sorted.clear();
+            sorted = null;
         }).start();
+    }
+
+    public void appendToLogArea(String msg) {
+        logArea.appendText(LocalDateTime.now().toString().replace("T", " ").substring(0, 19)
+                + " " + msg + "\n");
     }
 }

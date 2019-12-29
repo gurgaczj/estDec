@@ -30,31 +30,19 @@ public class EstDec {
     }
 
     public Set<FrequentItemset> buildFrequentItemSets() {
-        EstDecNode root = getRootNode();
+        Set<FrequentItemset> frequentItemsets = Collections.synchronizedSet(new HashSet<>());
 
-        if (root.getChildrens().isEmpty()) {
-            return null;
+        for (Map.Entry<String, EstDecNode> estDecNode : getRootNode().getChildrens().entrySet()) {
+            frequentItemsets.addAll(estDecTree.recursiveItemSetBuilding(estDecNode.getValue(), new String[0], frequentItemsets));
         }
 
-        //Hashtable<Double, String[]> frequentItemSets = estDecTree.createFrequentItemSets(estDecTree.getRoot(), new String[0], new Hashtable<Double, String[]>());
+        //this.rootNode.getChildrens().clear();
 
-        LinkedHashMultimap<Double , String[]> itemSetsSet = LinkedHashMultimap.create();
-        Set<FrequentItemset> frequentItemsets2 = new HashSet<>();
-        ArrayDeque<FrequentItemset> frequentItemsets = new ArrayDeque<>();
-        for (Map.Entry<String, EstDecNode> estDecNode : root.getChildrens().entrySet()) {
-            frequentItemsets.addAll(recursiveItemSetBuilding(estDecNode.getValue(), new String[0], frequentItemsets2));
-        }
-
-        return frequentItemsets2;
+        return frequentItemsets;
     }
-
-
 
     private Set<FrequentItemset> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, Set<FrequentItemset> itemsSet) {
         estDecNode.updateCountForSelectionPhase(estDecTree.getD(), estDecTree.getK());
-        if(estDecNode.getItem().equals("12")){
-            System.out.println("12");
-        }
         double support = estDecNode.calculateSupport(estDecTree.getDk());
         if(support < estDecTree.getSmin()){
             return itemsSet;
@@ -90,4 +78,10 @@ public class EstDec {
     public EstDecNode getRootNode() {
         return estDecTree.getRoot();
     }
+
+    public Integer getK() { return estDecTree.getK(); }
+
+    public Double getD() { return estDecTree.getD(); }
+
+    public Double getDk() { return estDecTree.getDk(); }
 }

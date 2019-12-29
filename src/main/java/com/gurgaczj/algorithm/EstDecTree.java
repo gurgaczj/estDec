@@ -204,6 +204,9 @@ public class EstDecTree {
         while(iterator.hasNext()){
             item = iterator.next();
             node = node.getChildNodeByItem(item);
+            if(node == null)
+                return 0;
+
             if(!iterator.hasNext())
                 return node.getCounter();
         }
@@ -218,6 +221,36 @@ public class EstDecTree {
             }
         }
         return distinctPairs;
+    }
+
+    public Set<FrequentItemset> mineFIs() {
+        Set<FrequentItemset> frequentItemsets = Collections.synchronizedSet(new HashSet<>());
+
+        for (Map.Entry<String, EstDecNode> estDecNode : getRoot().getChildrens().entrySet()) {
+            frequentItemsets.addAll(recursiveItemSetBuilding(estDecNode.getValue(), new String[0], frequentItemsets));
+        }
+
+        //this.rootNode.getChildrens().clear();
+
+        return frequentItemsets;
+    }
+
+    public Set<FrequentItemset> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, Set<FrequentItemset> itemsSet) {
+        estDecNode.updateCountForSelectionPhase(getD(), getK());
+        double support = estDecNode.calculateSupport(getDk());
+        int itemsetSize = items.length;
+        String[] tempItems = new String[itemsetSize + 1];
+        if (support >= getSmin()) {
+            System.arraycopy(items, 0, tempItems, 0, itemsetSize);
+            tempItems[itemsetSize] = estDecNode.getItem();
+            itemsSet.add(new FrequentItemset(support, tempItems, estDecNode.getError()));
+        }
+
+        for (Map.Entry<String, EstDecNode> childNode : estDecNode.getChildrens().entrySet()) {
+            itemsSet = recursiveItemSetBuilding(childNode.getValue(), tempItems, itemsSet);
+        }
+
+        return itemsSet;
     }
 
     private double calculateSupport(double count) {
