@@ -75,89 +75,90 @@ public class UIController {
     }
 
     private void insertFiFromFile() {
-        //TODO: file chooser
-
-        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("CSV File (*.csv)", "*.csv");
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Wybierz plik .csv");
-        fileChooser.getExtensionFilters().add(extensionFilter);
-
-        File csv = fileChooser.showOpenDialog(rootPane.getScene().getWindow());
-
-
-        String regex;
-        TextInputDialog textInputDialog = new TextInputDialog();
-        textInputDialog.setTitle("Podaj delimiter");
-        textInputDialog.setHeaderText("Podaj delimiter");
-        textInputDialog.setContentText("Podaj znak dzielenia danych w pliku");
-        Optional<String> s = textInputDialog.showAndWait();
-        if (s.isPresent()) {
-            regex = s.get();
-            System.out.println("regex = #" + regex + "#");
-        } else {
-            appendToLogArea("Nie podano znaku podziału danych");
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                FileReader fileReader = new FileReader(csv);
-                BufferedReader bufferedReader = new BufferedReader(fileReader);
-                String line;
-                int i = 1;
-                while ((line = bufferedReader.readLine()) != null) {
-
-                    String[] transaction = line.split(regex);
-                    Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
-                    List<String[]> filteredPowerSet = powerSet.stream()
-                            .filter(set -> set.size() != 0)
-                            .map(strings1 -> strings1.toArray(new String[strings1.size()]))
-                            .collect(Collectors.toList());
-                    algorithm.processTransaction(filteredPowerSet);
-
-                    i++;
-                    if (i % 10000 == 0) {
-                        System.out.println(i);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                appendToLogArea("Błąd podczas odczytywania pliku");
-            }
-        }).start();
-
-//        Set<String[]> transactions = new LinkedHashSet<>();
-//        transactions.add(new String[]{"1", "2"});
-//        transactions.add(new String[]{"2", "4"});
-//        transactions.add(new String[]{"2", "4"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"2", "4"});
+//        //TODO: file chooser
 //
-//        boolean selected = countErrorBox.isSelected();
+//        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("CSV File (*.csv)", "*.csv");
+//        FileChooser fileChooser = new FileChooser();
+//        fileChooser.setTitle("Wybierz plik .csv");
+//        fileChooser.getExtensionFilters().add(extensionFilter);
 //
-//        System.out.println(selected);
+//        File csv = fileChooser.showOpenDialog(rootPane.getScene().getWindow());
 //
-//        for (String[] transaction :
-//                transactions) {
-//            Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
-//            List<String[]> filteredPowerSet = powerSet.stream()
-//                    .filter(set -> set.size() != 0)
-//                    .map(strings1 -> strings1.toArray(new String[0]))
-//                    .collect(Collectors.toList());
-//            algorithm.processTransaction(filteredPowerSet);
+//
+//        String regex;
+//        TextInputDialog textInputDialog = new TextInputDialog();
+//        textInputDialog.setTitle("Podaj delimiter");
+//        textInputDialog.setHeaderText("Podaj delimiter");
+//        textInputDialog.setContentText("Podaj znak dzielenia danych w pliku");
+//        Optional<String> s = textInputDialog.showAndWait();
+//        if (s.isPresent()) {
+//            regex = s.get();
+//            System.out.println("regex = #" + regex + "#");
+//        } else {
+//            appendToLogArea("Nie podano znaku podziału danych");
+//            return;
 //        }
+//
+//        new Thread(() -> {
+//            try {
+//                FileReader fileReader = new FileReader(csv);
+//                BufferedReader bufferedReader = new BufferedReader(fileReader);
+//                String line;
+//                int i = 1;
+//                while ((line = bufferedReader.readLine()) != null) {
+//
+//                    String[] transaction = line.split(regex);
+//                    Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
+//                    List<String[]> filteredPowerSet = powerSet.stream()
+//                            .filter(set -> set.size() != 0)
+//                            .map(strings1 -> strings1.toArray(new String[strings1.size()]))
+//                            .collect(Collectors.toList());
+//                    algorithm.processTransaction(filteredPowerSet);
+//
+//                    i++;
+//                    if (i % 10000 == 0) {
+//                        System.out.println(i);
+//                    }
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                appendToLogArea("Błąd podczas odczytywania pliku");
+//            }
+//        }).start();
+
+        Set<String[]> transactions = new LinkedHashSet<>();
+        transactions.add(new String[]{"1", "2"});
+        transactions.add(new String[]{"2", "4"});
+        transactions.add(new String[]{"2", "4"});
+//        transactions.add(new String[]{"12", "24", "36"});
+//        transactions.add(new String[]{"12", "24", "36"});
+//        transactions.add(new String[]{"12", "24", "36"});
+//        transactions.add(new String[]{"12", "24", "36"});
+//        transactions.add(new String[]{"2", "4"});
+
+        boolean selected = countErrorBox.isSelected();
+
+        System.out.println(selected);
+
+        for (String[] transaction :
+                transactions) {
+            Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
+            List<String[]> filteredPowerSet = powerSet.stream()
+                    .filter(set -> set.size() != 0)
+                    .map(strings1 -> strings1.toArray(new String[0]))
+                    .collect(Collectors.toList());
+            algorithm.processTransaction(filteredPowerSet);
+        }
     }
 
+    @FXML
     private void mineFis() {
         fiTable.getItems().clear();
         new Thread(() -> {
             System.out.println(algorithm.getD() + " --- " + algorithm.getK() + " --- " + algorithm.getDk() + " --- " + sMin);
             Set<FrequentItemset> frequentItemSets = algorithm.buildFrequentItemSets();
 
-            if (frequentItemSets.isEmpty()) {
+            if (frequentItemSets.isEmpty() || frequentItemSets == null) {
                 //TODO: log error
                 appendToLogArea("Brak zbiorów częstych");
                 return;
@@ -169,6 +170,11 @@ public class UIController {
             sorted.clear();
             sorted = null;
         }).start();
+    }
+
+    @FXML
+    private void clearLogs(){
+        logArea.clear();
     }
 
     public void appendToLogArea(String msg) {

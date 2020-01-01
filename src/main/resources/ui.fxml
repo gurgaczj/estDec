@@ -18,9 +18,10 @@
     <TextField fx:id="sminProperty" layoutX="14.0" layoutY="420.0" prefWidth="147.0" promptText="Podaj sMin" />
     <Button fx:id="selectFileButton" layoutX="177.0" layoutY="360.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="147.0" text="Wybierz plik .csv" />
     <TextField fx:id="percentage" layoutX="14.0" layoutY="450.0" prefWidth="147.0" promptText="Podaj procent" />
-    <CheckBox fx:id="countErrorBox" layoutX="177.0" layoutY="403.0" mnemonicParsing="false" text="licz błąd" />
-    <Button fx:id="mineFIButton" layoutX="339.0" layoutY="360.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="137.0" text="Generuj zbiory częste" />
+    <CheckBox fx:id="countErrorBox" layoutX="177.0" layoutY="400.0" mnemonicParsing="false" text="licz błąd" />
+    <Button fx:id="mineFIButton" layoutX="339.0" layoutY="360.0" mnemonicParsing="false" onAction="#mineFis" prefHeight="25.0" prefWidth="137.0" text="Generuj zbiory częste" />
     <TextArea fx:id="logArea" layoutX="248.0" layoutY="403.0" prefHeight="83.0" prefWidth="338.0" wrapText="true" />
     <Button id="mineFIButton" fx:id="clearML" layoutX="492.0" layoutY="359.0" mnemonicParsing="false" prefHeight="25.0" text="Wyczyść ML" />
+    <Button fx:id="clearLogsButton" layoutX="168.0" layoutY="424.0" mnemonicParsing="false" onAction="#clearLogs" text="Czyść logi" />
   </children>
 </AnchorPane>

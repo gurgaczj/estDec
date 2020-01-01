@@ -141,22 +141,22 @@ public class EstDecTree {
 
         List<Set<String>> mSubsets = Collections.synchronizedList(new ArrayList<>());
         Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(itemSet)));
-        Iterator<Set<String>> iterator = powerSet.iterator();
-        Set<String> subSet;
-        while (iterator.hasNext()){
-            subSet = iterator.next();
-            if(subSet.size() == mSubsetLength){
-                mSubsets.add(subSet);
-            }
+//        Iterator<Set<String>> iterator = powerSet.iterator();
+//        Set<String> subSet;
+
+        for(Set<String> stringSet : powerSet){
+            if(stringSet.size() == mSubsetLength)
+                mSubsets.add(stringSet);
         }
-//        for(Set<String> set : powerSet){
-//            if(set.size() == mSubsetLength){
-//                mSubsets.add(set);
+//
+//        while (iterator.hasNext()){
+//            subSet = iterator.next();
+//            if(subSet.size() == mSubsetLength){
+//                mSubsets.add(subSet);
 //            }
 //        }
-//                .stream()
-//                .filter(strings -> strings.size() == itemsetLength - 1)
-//                .collect(Collectors.toList());
+        powerSet = null;
+
 
         Map<Set<String>, Set<String>> distinctPairs = getDistinctPairs(mSubsets);
 
