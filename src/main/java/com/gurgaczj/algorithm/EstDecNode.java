@@ -8,7 +8,6 @@ import java.util.Map;
 
 public class EstDecNode {
 
-    private String item;
     private Map<String, EstDecNode> childrens;
     private int mrtid;
     private double counter;
@@ -18,8 +17,7 @@ public class EstDecNode {
         this.childrens = Maps.newConcurrentMap();
     }
 
-    EstDecNode(String item, int mrtid, double cMax) {
-        this.item = item;
+    EstDecNode(int mrtid, double cMax) {
         this.mrtid = mrtid;
 
         this.counter = cMax;
@@ -28,8 +26,7 @@ public class EstDecNode {
         this.childrens = Maps.newConcurrentMap();
     }
 
-    public EstDecNode(String item, int k, double cMax, double cMin) {
-        this.item = item;
+    public EstDecNode(int k, double cMax, double cMin) {
         this.mrtid = k;
         this.counter = cMax;
 
@@ -47,17 +44,9 @@ public class EstDecNode {
         return childrens;
     }
 
-    EstDecNode addChild(EstDecNode child){
-        getChildrens().put(child.item, child);
+    EstDecNode addChild(String item, EstDecNode child){
+        getChildrens().put(item, child);
         return child;
-    }
-
-    String getItem() {
-        return item;
-    }
-
-    public void setItem(String item) {
-        this.item = item;
     }
 
     void updateCount(Double d, Integer k) {

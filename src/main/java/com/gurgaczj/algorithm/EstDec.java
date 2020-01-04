@@ -13,7 +13,6 @@ public class EstDec {
         estDecTree = new EstDecTree();
     }
 
-
     public EstDec(double smin, double sins, double sprn) {
         estDecTree = new EstDecTree(smin, sprn, sins);
     }
@@ -31,6 +30,10 @@ public class EstDec {
         for(Set<String> subSet : itemsetPowerSet){
         estDecTree.updateCount(subSet);
         estDecTree.insertItemSet(subSet);
+        }
+
+        if(getK()%10000 == 0){
+            estDecTree.forcePruning(getRootNode());
         }
     }
 
