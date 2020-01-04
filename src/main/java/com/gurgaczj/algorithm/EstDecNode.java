@@ -10,15 +10,15 @@ public class EstDecNode {
 
     private String item;
     private Map<String, EstDecNode> childrens;
-    private Integer mrtid;
-    private Double counter;
-    private Double error;
+    private int mrtid;
+    private double counter;
+    private double error;
 
     EstDecNode() {
         this.childrens = Maps.newConcurrentMap();
     }
 
-    EstDecNode(String item, Integer mrtid, double cMax) {
+    EstDecNode(String item, int mrtid, double cMax) {
         this.item = item;
         this.mrtid = mrtid;
 
@@ -28,7 +28,7 @@ public class EstDecNode {
         this.childrens = Maps.newConcurrentMap();
     }
 
-    public EstDecNode(String item, Integer k, double cMax, double cMin) {
+    public EstDecNode(String item, int k, double cMax, double cMin) {
         this.item = item;
         this.mrtid = k;
         this.counter = cMax;

@@ -22,6 +22,6 @@
     <Button fx:id="mineFIButton" layoutX="339.0" layoutY="360.0" mnemonicParsing="false" onAction="#mineFis" prefHeight="25.0" prefWidth="137.0" text="Generuj zbiory częste" />
     <TextArea fx:id="logArea" layoutX="248.0" layoutY="403.0" prefHeight="83.0" prefWidth="338.0" wrapText="true" />
     <Button id="mineFIButton" fx:id="clearML" layoutX="492.0" layoutY="359.0" mnemonicParsing="false" prefHeight="25.0" text="Wyczyść ML" />
-    <Button fx:id="clearLogsButton" layoutX="168.0" layoutY="424.0" mnemonicParsing="false" onAction="#clearLogs" text="Czyść logi" />
+    <Button fx:id="clearLogsButton" layoutX="168.0" layoutY="427.0" mnemonicParsing="false" onAction="#clearLogs" text="Czyść logi" />
   </children>
 </AnchorPane>

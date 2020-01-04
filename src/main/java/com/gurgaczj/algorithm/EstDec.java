@@ -1,8 +1,9 @@
 package com.gurgaczj.algorithm;
 
-import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Sets;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class EstDec {
 
@@ -21,57 +22,27 @@ public class EstDec {
         estDecTree.setDecayRate(b, h);
     }
 
-    public void processTransaction(List<String[]> transaction) {
+    public void processTransaction(Collection<String> transaction) {
+        Set<Set<String>> itemsetPowerSet = Sets.powerSet(new LinkedHashSet<>(transaction));
+        //itemsetPowerSet = itemsetPowerSet.stream().filter(subset -> subset.size() != 0).collect(Collectors.toSet());
+
         estDecTree.updateParam();
-        transaction.forEach(itemSet -> {
-        estDecTree.updateCount(itemSet);
-        estDecTree.insertItemSet(itemSet, 0);
-        });
+
+        for(Set<String> subSet : itemsetPowerSet){
+        estDecTree.updateCount(subSet);
+        estDecTree.insertItemSet(subSet);
+        }
     }
 
     public Set<FrequentItemset> buildFrequentItemSets() {
         Set<FrequentItemset> frequentItemsets = Collections.synchronizedSet(new HashSet<>());
 
         for (Map.Entry<String, EstDecNode> estDecNode : getRootNode().getChildrens().entrySet()) {
-            frequentItemsets.addAll(estDecTree.recursiveItemSetBuilding(estDecNode.getValue(), new String[0], frequentItemsets));
+            frequentItemsets.addAll(estDecTree.recursiveItemsetBuilding(estDecNode.getKey(), estDecNode.getValue(), new String[0], frequentItemsets));
         }
-
-        //this.rootNode.getChildrens().clear();
 
         return frequentItemsets;
     }
-
-    private Set<FrequentItemset> recursiveItemSetBuilding(EstDecNode estDecNode, String[] items, Set<FrequentItemset> itemsSet) {
-        estDecNode.updateCountForSelectionPhase(estDecTree.getD(), estDecTree.getK());
-        double support = estDecNode.calculateSupport(estDecTree.getDk());
-        if(support < estDecTree.getSmin()){
-            return itemsSet;
-        }
-        int itemsetSize = items.length;
-        String[] tempItems = new String[itemsetSize + 1];
-        System.arraycopy(items, 0, tempItems, 0, itemsetSize);
-        tempItems[itemsetSize] = estDecNode.getItem();
-        itemsSet.add(new FrequentItemset(support, tempItems, estDecNode.getError()));
-        if (estDecNode.getChildrens().isEmpty()) {
-            //itemsSet.add(tempItems);
-            return itemsSet;
-        }
-        for (Map.Entry<String, EstDecNode> childNode : estDecNode.getChildrens().entrySet()) {
-            itemsSet.addAll(recursiveItemSetBuilding(childNode.getValue(), tempItems, itemsSet));
-        }
-        return itemsSet;
-    }
-
-//    private Set<String[]> getAllItemSetsFromNode(EstDecNode node, HashSet<String[]> itemSets) {
-//        String[] itemArray = new String[1];
-//        HashSet<EstDecNode> nodeChilds = node.getChildrens();
-//        if (!nodeChilds.isEmpty()) {
-//            for (EstDecNode estDecNode : nodeChilds) {
-//                estDecNode.getItem();
-//            }
-//        }
-//        return null;
-//    }
 
 
     // for testing purposes

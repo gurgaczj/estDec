@@ -4,23 +4,26 @@ import java.math.BigDecimal;
 
 public class FrequentItemset {
 
-    private Double support;
+    private BigDecimal support;
     private String[] items;
+
+    //TODO: get rid of this
     private String itemsetString;
+
     private BigDecimal error;
 
     public FrequentItemset(double support, String[] items, double error) {
-        this.support = support;
+        this.support = new BigDecimal(support);
         this.items = items;
         this.error = new BigDecimal(error);
         this.itemsetString = toString();
     }
 
-    public Double getSupport() {
+    public BigDecimal getSupport() {
         return support;
     }
 
-    public void setSupport(Double support) {
+    public void setSupport(BigDecimal support) {
         this.support = support;
     }
 
