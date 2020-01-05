@@ -55,7 +55,7 @@ public class UIController {
         fiSupportColumn.setCellValueFactory(new PropertyValueFactory<>("support"));
         fiErrorColumn.setCellValueFactory(new PropertyValueFactory<>("error"));
 
-        sminProperty.setText("0.05");
+        sminProperty.setText("0.5");
         bProperty.setText("2");
         hProperty.setText("10000");
         percentage.setText("10");
@@ -75,7 +75,7 @@ public class UIController {
         clearML.setOnAction(event -> algorithm.getRootNode().getChildrens().clear());
     }
 
-    private List<String[]> generateData(int n){
+    private List<String[]> generateData(int n) {
         String words = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum blandit turpis nisi, ac " +
                 "suscipit est vestibulum id. Ut nec placerat ante. Aenean congue odio quis lorem suscipit venenatis. " +
                 "Sed sed dui eros. Mauris venenatis lobortis ante, egestas congue dui elementum a. Fusce vulputate " +
@@ -86,13 +86,13 @@ public class UIController {
 
         List<String[]> result = new ArrayList<>(n);
         Random random = new Random();
-        for(int i = 0; i < n; i++){
-            int arrayLength = random.nextInt(separated.length)+1;
-            if(arrayLength > 30){
+        for (int i = 0; i < n; i++) {
+            int arrayLength = random.nextInt(separated.length) + 1;
+            if (arrayLength > 30) {
                 arrayLength = 30;
             }
             String[] transaction = new String[arrayLength];
-            for(int j = 0; j < arrayLength; j++){
+            for (int j = 0; j < arrayLength; j++) {
                 int index = random.nextInt(separated.length);
                 transaction[j] = separated[index];
             }
@@ -176,7 +176,7 @@ public class UIController {
 //
 //        System.out.println(selected);
 //
-       // List<String[]> transactions = generateData(15000);
+        // List<String[]> transactions = generateData(15000);
 //        appendToLogArea("Rozpoczęto analizę");
 //
 //        new Thread(() -> {
@@ -202,16 +202,14 @@ public class UIController {
                 return;
             }
             List<FrequentItemset> sorted = frequentItemSets.stream().sorted((fi1, fi2) -> fi2.getSupport().compareTo(fi1.getSupport())).collect(Collectors.toList());
-            frequentItemSets.clear();
-            frequentItemSets = null;
             fiTable.getItems().addAll(sorted);
+            frequentItemSets.clear();
             sorted.clear();
-            sorted = null;
         }).start();
     }
 
     @FXML
-    private void clearLogs(){
+    private void clearLogs() {
         logArea.clear();
     }
 

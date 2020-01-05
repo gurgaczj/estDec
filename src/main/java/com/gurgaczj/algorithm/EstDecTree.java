@@ -63,7 +63,7 @@ public class EstDecTree {
         EstDecNode currentNode = getRoot();
         int itemsetSize = itemSet.size();
         Iterator<String> itemSetIterator = itemSet.iterator();
-        while(itemSetIterator.hasNext()){
+        while (itemSetIterator.hasNext()) {
             String item = itemSetIterator.next();
             EstDecNode tempNode = currentNode.getChildNodeByItem(item);
             if (tempNode == null) {
@@ -109,9 +109,9 @@ public class EstDecTree {
 
         List<Set<String>> mSubsets = new ArrayList<>();
 
-        String[] array = itemSet.toArray(new String[0]);
-        for(int i = 0; i < array.length; i++) {
-            mSubsets.add(getMSubset(array, i));
+        String[] itemsetArray = itemSet.toArray(new String[0]);
+        for (int i = 0; i < itemsetArray.length; i++) {
+            mSubsets.add(getMSubset(itemsetArray, i));
         }
 
         Map<Set<String>, Set<String>> distinctPairs = getDistinctPairs(mSubsets);
@@ -130,8 +130,8 @@ public class EstDecTree {
     private Set<String> getMSubset(String[] array, int index) {
         Set<String> result = new LinkedHashSet<>();
         int arrayLength = array.length;
-        for(int i = 0; i < arrayLength; i++){
-            if(i == index)
+        for (int i = 0; i < arrayLength; i++) {
+            if (i == index)
                 continue;
 
             result.add(array[i]);
@@ -179,17 +179,17 @@ public class EstDecTree {
         return 0;
     }
 
-    private double getCountOfItemset(Set<String> itemSet){
+    private double getCountOfItemset(Set<String> itemSet) {
         EstDecNode node = getRoot();
         Iterator<String> iterator = itemSet.iterator();
         String item;
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             item = iterator.next();
             node = node.getChildNodeByItem(item);
-            if(node == null)
+            if (node == null)
                 return 0;
 
-            if(!iterator.hasNext())
+            if (!iterator.hasNext())
                 return node.getCounter();
         }
         return 0;
@@ -213,7 +213,7 @@ public class EstDecTree {
         if (support >= getSmin()) {
             System.arraycopy(items, 0, tempItems, 0, itemsetSize);
             tempItems[itemsetSize] = item;
-            itemsSet.add(new FrequentItemset(support, tempItems, (estDecNode.getError()/getDk())));
+            itemsSet.add(new FrequentItemset(support, tempItems, (estDecNode.getError() / getDk())));
         }
 
         for (Map.Entry<String, EstDecNode> childNode : estDecNode.getChildrens().entrySet()) {
@@ -290,9 +290,9 @@ public class EstDecTree {
     }
 
     public void forcePruning(EstDecNode node) {
-        for(Map.Entry<String, EstDecNode> entry: node.getChildrens().entrySet()){
+        for (Map.Entry<String, EstDecNode> entry : node.getChildrens().entrySet()) {
             double support = entry.getValue().calculateSupport(getDk());
-            if(support < getSprn()){
+            if (support < getSprn()) {
                 node.getChildrens().remove(entry.getKey());
             } else {
                 forcePruning(entry.getValue());

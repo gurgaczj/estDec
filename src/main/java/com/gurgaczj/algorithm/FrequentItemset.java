@@ -51,11 +51,11 @@ public class FrequentItemset {
         this.itemsetString = itemsetString;
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder frequentItemsetInfo = new StringBuilder("[");
-        for(int i = 0; i < getItems().length; i++){
+        for (int i = 0; i < getItems().length; i++) {
             frequentItemsetInfo.append(getItems()[i]);
-            if(i == getItems().length - 1){
+            if (i == getItems().length - 1) {
                 break;
             }
             frequentItemsetInfo.append(", ");

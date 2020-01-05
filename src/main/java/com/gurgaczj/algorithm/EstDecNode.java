@@ -35,7 +35,7 @@ public class EstDecNode {
         this.childrens = Maps.newConcurrentMap();
     }
 
-    EstDecNode getChildNodeByItem(String item){
+    EstDecNode getChildNodeByItem(String item) {
         return childrens.get(item);
     }
 
@@ -44,7 +44,7 @@ public class EstDecNode {
         return childrens;
     }
 
-    EstDecNode addChild(String item, EstDecNode child){
+    EstDecNode addChild(String item, EstDecNode child) {
         getChildrens().put(item, child);
         return child;
     }
@@ -55,13 +55,13 @@ public class EstDecNode {
         mrtid = k;
     }
 
-    void updateCountForSelectionPhase(Double d, Integer k){
+    void updateCountForSelectionPhase(Double d, Integer k) {
         counter = counter * Math.pow(d, k - mrtid);
         error = error * Math.pow(d, k - mrtid);
         mrtid = k;
     }
 
-    Double calculateSupport(Double Dk){
+    Double calculateSupport(Double Dk) {
         return counter / Dk;
     }
 

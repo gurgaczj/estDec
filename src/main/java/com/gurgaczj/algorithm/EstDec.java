@@ -27,12 +27,12 @@ public class EstDec {
 
         estDecTree.updateParam();
 
-        for(Set<String> subSet : itemsetPowerSet){
-        estDecTree.updateCount(subSet);
-        estDecTree.insertItemSet(subSet);
+        for (Set<String> subSet : itemsetPowerSet) {
+            estDecTree.updateCount(subSet);
+            estDecTree.insertItemSet(subSet);
         }
 
-        if(getK()%10000 == 0){
+        if (getK() % 10000 == 0) {
             estDecTree.forcePruning(getRootNode());
         }
     }
@@ -53,9 +53,15 @@ public class EstDec {
         return estDecTree.getRoot();
     }
 
-    public Integer getK() { return estDecTree.getK(); }
+    public Integer getK() {
+        return estDecTree.getK();
+    }
 
-    public Double getD() { return estDecTree.getD(); }
+    public Double getD() {
+        return estDecTree.getD();
+    }
 
-    public Double getDk() { return estDecTree.getDk(); }
+    public Double getDk() {
+        return estDecTree.getDk();
+    }
 }
