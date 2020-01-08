@@ -1,20 +1,23 @@
 package com.gurgaczj.controller;
 
-import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.Sets;
 import com.gurgaczj.algorithm.EstDec;
-import com.gurgaczj.algorithm.FrequentItemset;
+import com.gurgaczj.model.FrequentItemset;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class UIController {
 
     @FXML
@@ -22,7 +25,7 @@ public class UIController {
     @FXML
     private TableView<FrequentItemset> fiTable;
     @FXML
-    private TableColumn<FrequentItemset, String[]> fiColumn;
+    private TableColumn<FrequentItemset, Set<String>> fiColumn;
     @FXML
     private TableColumn<FrequentItemset, Double> fiSupportColumn;
     @FXML
@@ -32,13 +35,13 @@ public class UIController {
     @FXML
     private TextField hProperty;
     @FXML
-    private TextField sminProperty;
+    private TextField sMinProperty;
     @FXML
-    private TextField percentage;
+    private TextField sInsProperty;
+    @FXML
+    private TextField sPrnProperty;
     @FXML
     private Button selectFileButton;
-    @FXML
-    private CheckBox countErrorBox;
     @FXML
     private Button mineFIButton;
     @FXML
@@ -47,26 +50,13 @@ public class UIController {
     private Button clearML;
 
     private EstDec algorithm;
-    private double sMin;
+    boolean isMining = false;
 
     @FXML
     public void initialize() {
-        fiColumn.setCellValueFactory(new PropertyValueFactory<>("itemsetString"));
+        fiColumn.setCellValueFactory(new PropertyValueFactory<>("itemset"));
         fiSupportColumn.setCellValueFactory(new PropertyValueFactory<>("support"));
         fiErrorColumn.setCellValueFactory(new PropertyValueFactory<>("error"));
-
-        sminProperty.setText("0.5");
-        bProperty.setText("2");
-        hProperty.setText("10000");
-        percentage.setText("10");
-
-        sMin = Double.parseDouble(sminProperty.getText());
-        double sins = sMin * (Integer.parseInt(percentage.getText()) / 100.0);
-        double sprn = sMin * (Integer.parseInt(percentage.getText()) / 100.0);
-
-        this.algorithm = new EstDec(sMin, sins, sprn);
-
-        this.algorithm.setDecayRate(Double.parseDouble(bProperty.getText()), Double.parseDouble(hProperty.getText()));
 
         selectFileButton.setOnAction(event -> insertFiFromFile());
 
@@ -103,7 +93,20 @@ public class UIController {
     }
 
     private void insertFiFromFile() {
-        //TODO: file chooser
+        if (isMining){
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Proszę czekać");
+            alert.setHeaderText("Proszę czekać");
+            alert.setContentText("Proszę czekać, trwa analizowanie");
+            alert.showAndWait();
+            return;
+        }
+        try {
+            initEstDec();
+        } catch (IllegalArgumentException e) {
+            appendToLogArea(e.getMessage());
+            return;
+        }
 
         FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("CSV File (*.csv)", "*.csv");
         FileChooser fileChooser = new FileChooser();
@@ -126,7 +129,7 @@ public class UIController {
             appendToLogArea("Nie podano znaku podziału danych");
             return;
         }
-
+        isMining = true;
         new Thread(() -> {
             try {
                 FileReader fileReader = new FileReader(csv);
@@ -149,10 +152,14 @@ public class UIController {
                 bufferedReader.close();
                 fileReader.close();
                 appendToLogArea("Rozpoczęto analize");
-                fileContent.forEach(algorithm::processTransaction);
+                fileContent.forEach(strings -> {
+                    this.algorithm.processTransaction(strings);
+                });
+                isMining = false;
                 appendToLogArea("Zakonczono analize");
             } catch (IOException e) {
                 e.printStackTrace();
+                isMining = false;
                 appendToLogArea("Błąd podczas odczytywania pliku");
             }
         }).start();
@@ -189,19 +196,69 @@ public class UIController {
 
     }
 
+    private void initEstDec() throws IllegalArgumentException {
+        double bPropertyVal;
+        try {
+            bPropertyVal = Double.parseDouble(bProperty.getText());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Podaj wartość dla parametru b");
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Zły format dla parametru b");
+        }
+
+        double hPropertyVal;
+        try {
+            hPropertyVal = Double.parseDouble(hProperty.getText());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Podaj wartość dla parametru h");
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Zły format dla parametru h");
+        }
+
+        double sMin;
+        try {
+            sMin = Double.parseDouble(sMinProperty.getText());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Podaj wartość dla sMin");
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Zły format dla sMin");
+        }
+
+        double sIns;
+        try {
+            sIns = Double.parseDouble(sInsProperty.getText());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Podaj wartość dla sIns");
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Zły format dla sIns");
+        }
+
+        double sPrn;
+        try {
+            sPrn = Double.parseDouble(sPrnProperty.getText());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Podaj wartość dla sPrn");
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Zły format dla sPrn");
+        }
+
+        this.algorithm = new EstDec(sMin, sIns, sPrn);
+
+        this.algorithm.setDecayRate(bPropertyVal, hPropertyVal);
+    }
+
     @FXML
     private void mineFis() {
         fiTable.getItems().clear();
         new Thread(() -> {
-            System.out.println(algorithm.getD() + " --- " + algorithm.getK() + " --- " + algorithm.getDk() + " --- " + sMin);
             Set<FrequentItemset> frequentItemSets = algorithm.buildFrequentItemSets();
 
             if (frequentItemSets.isEmpty() || frequentItemSets == null) {
-                //TODO: log error
                 appendToLogArea("Brak zbiorów częstych");
                 return;
             }
             List<FrequentItemset> sorted = frequentItemSets.stream().sorted((fi1, fi2) -> fi2.getSupport().compareTo(fi1.getSupport())).collect(Collectors.toList());
+            appendToLogArea("Liczba zbiorów częstych wynosi: " + sorted.size());
             fiTable.getItems().addAll(sorted);
             frequentItemSets.clear();
             sorted.clear();

@@ -1,9 +1,9 @@
 package com.gurgaczj.algorithm;
 
 import com.google.common.collect.Sets;
+import com.gurgaczj.model.FrequentItemset;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class EstDec {
 

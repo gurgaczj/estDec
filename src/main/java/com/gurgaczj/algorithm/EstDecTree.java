@@ -1,6 +1,7 @@
 package com.gurgaczj.algorithm;
 
 import com.google.common.collect.Sets;
+import com.gurgaczj.model.FrequentItemset;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -139,20 +140,6 @@ public class EstDecTree {
         return result;
     }
 
-    private double calculateCountOfUnionItemset(Set<String> subset1, Set<String> subset2) {
-        Sets.SetView<String> intersection = Sets.intersection(subset1, subset2);
-        double e1Count = getCountOfItemset(subset1);
-        double e2Count = getCountOfItemset(subset2);
-        double count;
-        if (intersection.isEmpty()) {
-            count = e1Count + e2Count - getK();
-        } else {
-            double interSectionCount = getCountOfItemset(intersection);
-            count = e1Count + e2Count - interSectionCount;
-        }
-        return Math.max(count, 0.0);
-    }
-
     private double calculateCountOfUnionItemset(Map.Entry<Set<String>, Set<String>> entry) {
         Sets.SetView<String> intersection = Sets.intersection(entry.getKey(), entry.getValue());
         double e1Count = getCountOfItemset(entry.getKey());
@@ -165,18 +152,6 @@ public class EstDecTree {
             count = e1Count + e2Count - interSectionCount;
         }
         return Math.max(count, 0.0);
-    }
-
-    private double getCountOfItemset(String[] itemset) {
-        EstDecNode node = getRoot();
-        int itemsetSize = itemset.length;
-        for (int i = 0; i < itemsetSize; i++) {
-            node = node.getChildNodeByItem(itemset[i]);
-            if (i == itemsetSize - 1) {
-                return node.getCounter();
-            }
-        }
-        return 0;
     }
 
     private double getCountOfItemset(Set<String> itemSet) {
