@@ -54,8 +54,6 @@ public class EstDec {
         return frequentItemsets;
     }
 
-
-    // for testing purposes
     public EstDecNode getRootNode() {
         return estDecTree.getRoot();
     }

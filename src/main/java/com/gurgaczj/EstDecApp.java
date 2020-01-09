@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class EstDecApp {
 
 	public static void main(String[] args) {
-//		SpringApplication.run(IPSApplication.class, args);
 		Application.launch(JavaFxApplication.class, args);
 	}
 

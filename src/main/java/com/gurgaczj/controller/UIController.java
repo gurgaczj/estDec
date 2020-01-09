@@ -65,33 +65,6 @@ public class UIController {
         clearML.setOnAction(event -> algorithm.getRootNode().getChildrens().clear());
     }
 
-    private List<String[]> generateData(int n) {
-        String words = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum blandit turpis nisi, ac " +
-                "suscipit est vestibulum id. Ut nec placerat ante. Aenean congue odio quis lorem suscipit venenatis. " +
-                "Sed sed dui eros. Mauris venenatis lobortis ante, egestas congue dui elementum a. Fusce vulputate " +
-                "mauris sapien, a viverra metus dignissim in. Phasellus eget lacinia purus. Praesent at pretium arcu, " +
-                "nec luctus orci. Praesent non rhoncus tellus. Aliquam sed eros a augue scelerisque blandit.";
-
-        String[] separated = words.split(" ");
-
-        List<String[]> result = new ArrayList<>(n);
-        Random random = new Random();
-        for (int i = 0; i < n; i++) {
-            int arrayLength = random.nextInt(separated.length) + 1;
-            if (arrayLength > 30) {
-                arrayLength = 30;
-            }
-            String[] transaction = new String[arrayLength];
-            for (int j = 0; j < arrayLength; j++) {
-                int index = random.nextInt(separated.length);
-                transaction[j] = separated[index];
-            }
-            result.add(transaction);
-        }
-        appendToLogArea("Ilość wygenerowanych danych = " + result.size());
-        return result;
-    }
-
     private void insertFiFromFile() {
         if (isMining){
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -141,13 +114,6 @@ public class UIController {
 
                     String[] transaction = line.split(regex);
                     fileContent.add(Arrays.asList(transaction));
-                    //algorithm.processTransaction(Arrays.asList(transaction));
-//                    Set<Set<String>> powerSet = Sets.powerSet(Sets.newLinkedHashSet(Arrays.asList(transaction)));
-//                    List<Set<String>> filteredPowerSet = powerSet.stream()
-//                            .filter(set -> set.size() != 0)
-//                            .collect(Collectors.toList());
-//                    filteredPowerSet.forEach(algorithm::processTransaction);
-//                    algorithm.processTransaction(filteredPowerSet);
                 }
                 bufferedReader.close();
                 fileReader.close();
@@ -157,43 +123,13 @@ public class UIController {
                 });
                 isMining = false;
                 appendToLogArea("Zakonczono analize");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 isMining = false;
                 appendToLogArea("Błąd podczas odczytywania pliku");
+                return;
             }
         }).start();
-
-
-//               List<Collection<String>> transactions = new ArrayList<>();
-//        transactions.add(Arrays.asList("1", "2"));
-//        transactions.add(Arrays.asList("2", "4"));
-//        transactions.add(Arrays.asList("2", "4"));
-//        LinkedHashMultiset<Set<String>> transactionsSet = new LinkedHashSet<>();
-//        transactionsSet.add(new LinkedHashSet<>(Arrays.asList("1", "2")));
-//        transactionsSet.add(new LinkedHashSet<>(Arrays.asList("2", "4")));
-//        transactionsSet.add(new LinkedHashSet<>(Arrays.asList("2", "4")));
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"12", "24", "36"});
-//        transactions.add(new String[]{"2", "4"});
-
-//        boolean selected = countErrorBox.isSelected();
-//
-//        System.out.println(selected);
-//
-        // List<String[]> transactions = generateData(15000);
-//        appendToLogArea("Rozpoczęto analizę");
-//
-//        new Thread(() -> {
-//            for (Collection<String> transaction :
-//                    transactions) {
-//                algorithm.processTransaction(transaction);
-//            }
-//            appendToLogArea("Zakończono analizę");
-//        }).start();
-
     }
 
     private void initEstDec() throws IllegalArgumentException {
