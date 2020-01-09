@@ -23,5 +23,6 @@
     <Button id="mineFIButton" fx:id="clearML" layoutX="492.0" layoutY="359.0" mnemonicParsing="false" prefHeight="25.0" text="Wyczyść ML" />
     <Button fx:id="clearLogsButton" layoutX="168.0" layoutY="403.0" mnemonicParsing="false" onAction="#clearLogs" text="Czyść logi" />
     <TextField id="percentage" fx:id="sPrnProperty" layoutX="14.0" layoutY="480.0" prefWidth="147.0" promptText="Podaj sPrn" />
+    <Button id="clearLogsButton" layoutX="168.0" layoutY="434.0" mnemonicParsing="false" onAction="#pruning" text="Pruning" />
   </children>
 </AnchorPane>

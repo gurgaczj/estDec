@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class EstDecTree {
 
@@ -48,7 +49,7 @@ public class EstDecTree {
      * @param b
      * @param h
      */
-    void setDecayRate(Double b, Double h) {
+    void setDecayRate(Double b, Double h) throws IllegalArgumentException {
         d = Math.pow(b, -1 / h);
         System.out.println("d=" + d);
     }

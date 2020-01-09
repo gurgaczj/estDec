@@ -4,17 +4,21 @@ import com.google.common.collect.Sets;
 import com.gurgaczj.model.FrequentItemset;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class EstDec {
 
     private EstDecTree estDecTree;
+    private boolean shouldPruning;
 
     public EstDec() {
-        estDecTree = new EstDecTree();
+        this.estDecTree = new EstDecTree();
+        this.shouldPruning = false;
     }
 
     public EstDec(double smin, double sins, double sprn) {
-        estDecTree = new EstDecTree(smin, sprn, sins);
+        this.estDecTree = new EstDecTree(smin, sprn, sins);
+        this.shouldPruning = false;
     }
 
     public void setDecayRate(double b, double h) {
@@ -22,8 +26,10 @@ public class EstDec {
     }
 
     public void processTransaction(Collection<String> transaction) {
-        Set<Set<String>> itemsetPowerSet = Sets.powerSet(new LinkedHashSet<>(transaction));
-        //itemsetPowerSet = itemsetPowerSet.stream().filter(subset -> subset.size() != 0).collect(Collectors.toSet());
+        Set<Set<String>> itemsetPowerSet = Sets.powerSet(new LinkedHashSet<>(transaction))
+                .stream()
+                .filter(strings -> strings.size() != 0)
+                .collect(Collectors.toSet());
 
         estDecTree.updateParam();
 
@@ -32,8 +38,9 @@ public class EstDec {
             estDecTree.insertItemSet(subSet);
         }
 
-        if (getK() % 10000 == 0) {
+        if (getK() % 10000 == 0 || shouldPruning) {
             estDecTree.forcePruning(getRootNode());
+            this.shouldPruning = false;
         }
     }
 
@@ -63,5 +70,21 @@ public class EstDec {
 
     public Double getDk() {
         return estDecTree.getDk();
+    }
+
+    public EstDecTree getEstDecTree() {
+        return estDecTree;
+    }
+
+    public void setEstDecTree(EstDecTree estDecTree) {
+        this.estDecTree = estDecTree;
+    }
+
+    public boolean isShouldPruning() {
+        return shouldPruning;
+    }
+
+    public void setShouldPruning(boolean shouldPruning) {
+        this.shouldPruning = shouldPruning;
     }
 }

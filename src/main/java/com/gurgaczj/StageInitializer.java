@@ -31,6 +31,7 @@ public class StageInitializer implements ApplicationListener<JavaFxApplication.S
     public void onApplicationEvent(JavaFxApplication.StageReadyEvent stageReadyEvent) {
         try {
             Stage stage = stageReadyEvent.getStage();
+            stage.setOnCloseRequest(status -> System.exit(0));
             URL url = this.fxml.getURL();
             FXMLLoader loader = new FXMLLoader(url);
             loader.setControllerFactory(applicationContext::getBean);

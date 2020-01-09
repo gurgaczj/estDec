@@ -206,6 +206,10 @@ public class UIController {
             throw new IllegalArgumentException("Zły format dla parametru b");
         }
 
+        if(bPropertyVal <= 1){
+            throw new IllegalArgumentException("Wartość parametru b jest mniejsza lub równa 1");
+        }
+
         double hPropertyVal;
         try {
             hPropertyVal = Double.parseDouble(hProperty.getText());
@@ -213,6 +217,16 @@ public class UIController {
             throw new IllegalArgumentException("Podaj wartość dla parametru h");
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Zły format dla parametru h");
+        }
+
+        if(hPropertyVal < 1){
+            throw new IllegalArgumentException("Wartość parametru h jest mniejsza od 1");
+        }
+
+        double d = Math.pow(bPropertyVal, -1 / hPropertyVal);
+
+        if(!(Math.pow(bPropertyVal, -1) <= d) && !(d < 1)){
+            throw new IllegalArgumentException("Wartości parametrów b i h nie są zgodne dla (b^-1) <= d < 1");
         }
 
         double sMin;
@@ -263,6 +277,15 @@ public class UIController {
             frequentItemSets.clear();
             sorted.clear();
         }).start();
+    }
+
+    @FXML
+    private void pruning(){
+        try {
+            this.algorithm.setShouldPruning(true);
+        } catch (NullPointerException e){
+            appendToLogArea("Program jeszcze nie rozpoczął analizy");
+        }
     }
 
     @FXML
