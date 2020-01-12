@@ -1,3 +1,2 @@
 # estDec
-estDec algorithm implementation in Java
-Project uses Google Guava and JavaFX
+estDec algorithm implementation in Java. Project uses Google Guava and JavaFX
