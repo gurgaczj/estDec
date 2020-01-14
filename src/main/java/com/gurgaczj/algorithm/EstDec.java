@@ -9,16 +9,13 @@ import java.util.stream.Collectors;
 public class EstDec {
 
     private EstDecTree estDecTree;
-    private boolean shouldPruning;
-
+    
     public EstDec() {
         this.estDecTree = new EstDecTree();
-        this.shouldPruning = false;
     }
 
     public EstDec(double smin, double sins, double sprn) {
         this.estDecTree = new EstDecTree(smin, sprn, sins);
-        this.shouldPruning = false;
     }
 
     public void setDecayRate(double b, double h) {
@@ -28,7 +25,7 @@ public class EstDec {
     public void processTransaction(Collection<String> transaction) {
         Set<Set<String>> itemsetPowerSet = Sets.powerSet(new LinkedHashSet<>(transaction))
                 .stream()
-                .filter(strings -> strings.size() != 0)
+                .filter(subSet -> subSet.size() != 0)
                 .collect(Collectors.toSet());
 
         estDecTree.updateParam();
@@ -38,9 +35,8 @@ public class EstDec {
             estDecTree.insertItemSet(subSet);
         }
 
-        if (getK() % 10000 == 0 || shouldPruning) {
+        if (getK() % 10000 == 0) {
             estDecTree.forcePruning(getRootNode());
-            this.shouldPruning = false;
         }
     }
 
@@ -76,13 +72,5 @@ public class EstDec {
 
     public void setEstDecTree(EstDecTree estDecTree) {
         this.estDecTree = estDecTree;
-    }
-
-    public boolean isShouldPruning() {
-        return shouldPruning;
-    }
-
-    public void setShouldPruning(boolean shouldPruning) {
-        this.shouldPruning = shouldPruning;
     }
 }

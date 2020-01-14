@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,9 +27,9 @@ public class UIController {
     @FXML
     private TableColumn<FrequentItemset, Set<String>> fiColumn;
     @FXML
-    private TableColumn<FrequentItemset, Double> fiSupportColumn;
+    private TableColumn<FrequentItemset, BigDecimal> fiSupportColumn;
     @FXML
-    private TableColumn<FrequentItemset, Double> fiErrorColumn;
+    private TableColumn<FrequentItemset, BigDecimal> fiErrorColumn;
     @FXML
     private TextField bProperty;
     @FXML
@@ -54,6 +54,7 @@ public class UIController {
 
     @FXML
     public void initialize() {
+        logArea.setEditable(false);
         fiColumn.setCellValueFactory(new PropertyValueFactory<>("itemset"));
         fiSupportColumn.setCellValueFactory(new PropertyValueFactory<>("support"));
         fiErrorColumn.setCellValueFactory(new PropertyValueFactory<>("error"));
@@ -122,6 +123,7 @@ public class UIController {
                     this.algorithm.processTransaction(strings);
                 });
                 isMining = false;
+                mineFis();
                 appendToLogArea("Zakonczono analize");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -213,15 +215,6 @@ public class UIController {
             frequentItemSets.clear();
             sorted.clear();
         }).start();
-    }
-
-    @FXML
-    private void pruning(){
-        try {
-            this.algorithm.setShouldPruning(true);
-        } catch (NullPointerException e){
-            appendToLogArea("Program jeszcze nie rozpoczął analizy");
-        }
     }
 
     @FXML

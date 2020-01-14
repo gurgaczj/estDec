@@ -14,11 +14,11 @@ public class EstDecTree {
     private double d; // decay rate
     private double Dk; // |D|k
     private Integer k; // actual transaction id
-    private final double smin; // minimum Support
+    private final double smin; // Smin
     private final double sins; // Sins
-    private final double sprn;
+    private final double sprn; // Sprn
 
-    private EstDecNode root;
+    private volatile EstDecNode root;
 
     EstDecTree() {
         this.smin = 0.0;
@@ -42,12 +42,6 @@ public class EstDecTree {
         root = new EstDecNode();
     }
 
-    /**
-     * Sets decay rate.
-     *
-     * @param b
-     * @param h
-     */
     void setDecayRate(Double b, Double h) throws IllegalArgumentException {
         d = Math.pow(b, -1 / h);
         System.out.println("d=" + d);
@@ -76,7 +70,6 @@ public class EstDecTree {
             }
 
             if (tempNode.calculateSupport(Dk) < sprn && itemsetSize > 1) {
-                //System.out.println("Pruning dla " + tempNode.getItem());
                 currentNode.getChildrens().remove(tempNode);
                 return;
             }
@@ -85,20 +78,25 @@ public class EstDecTree {
     }
 
     public void insertItemSet(Set<String> itemSet) {
-        int itemSetLength = itemSet.size();
         EstDecNode currentNode = getRoot();
+
+        if (itemSet.size() == 1) {
+            String item = itemSet.toArray(new String[1])[0];
+            if (currentNode.getChildNodeByItem(item) == null) {
+                currentNode.addChild(item, new EstDecNode(k, 1));
+            }
+            return;
+        }
+
         for (String item : itemSet) {
             EstDecNode childNode = currentNode.getChildNodeByItem(item);
             if (childNode == null) {
-                if (itemSetLength == 1) {
-                    currentNode.addChild(item, new EstDecNode(k, 1));
-                    break;
+                double cMax = estimateCMax(itemSet);
+                if (calculateSupport(cMax) >= sins) {
+                    double cMin = estimateCMin(itemSet);
+                    currentNode = currentNode.addChild(item, new EstDecNode(k, cMax, cMin));
                 } else {
-                    double cMax = estimateCMax(itemSet);
-                    if (calculateSupport(cMax) >= sins) {
-                        double cMin = estimateCMin(itemSet);
-                        currentNode = currentNode.addChild(item, new EstDecNode(k, cMax, cMin));
-                    }
+                    return;
                 }
             } else {
                 currentNode = childNode;
@@ -202,12 +200,6 @@ public class EstDecTree {
         return count / this.Dk;
     }
 
-    /**
-     * Estimates itemSet count
-     *
-     * @param itemSet
-     * @return
-     */
     private double estimateCMax(Set<String> itemSet) {
         double cMax = Double.MAX_VALUE;
         int itemsetLength = itemSet.size();
@@ -236,13 +228,6 @@ public class EstDecTree {
         return (1 - Math.pow(d, length - 1)) / (1 - d);
     }
 
-    /**
-     * Returns count of itemSet without item at given position
-     *
-     * @param itemSet
-     * @param index
-     * @return
-     */
     private double getItemSetCountWithoutItemAtIndex(Set<String> itemSet, int index) {
         EstDecNode currentNode = getRoot();
         int itemSetSize = itemSet.size();
@@ -265,12 +250,12 @@ public class EstDecTree {
     }
 
     public void forcePruning(EstDecNode node) {
-        for (Map.Entry<String, EstDecNode> entry : node.getChildrens().entrySet()) {
-            double support = entry.getValue().calculateSupport(getDk());
+        for (Map.Entry<String, EstDecNode> child : node.getChildrens().entrySet()) {
+            double support = child.getValue().calculateSupport(getDk());
             if (support < getSprn()) {
-                node.getChildrens().remove(entry.getKey());
+                node.getChildrens().remove(child.getKey());
             } else {
-                forcePruning(entry.getValue());
+                forcePruning(child.getValue());
             }
         }
     }
