@@ -27,9 +27,9 @@ public class UIController {
     @FXML
     private TableColumn<FrequentItemset, Set<String>> fiColumn;
     @FXML
-    private TableColumn<FrequentItemset, BigDecimal> fiSupportColumn;
+    private TableColumn<FrequentItemset, String> fiSupportColumn;
     @FXML
-    private TableColumn<FrequentItemset, BigDecimal> fiErrorColumn;
+    private TableColumn<FrequentItemset, String> fiErrorColumn;
     @FXML
     private TextField bProperty;
     @FXML
@@ -46,8 +46,6 @@ public class UIController {
     private Button mineFIButton;
     @FXML
     private TextArea logArea;
-    @FXML
-    private Button clearML;
 
     private EstDec algorithm;
     boolean isMining = false;
@@ -62,8 +60,6 @@ public class UIController {
         selectFileButton.setOnAction(event -> insertFiFromFile());
 
         mineFIButton.setOnAction(event -> mineFis());
-
-        clearML.setOnAction(event -> algorithm.getRootNode().getChildrens().clear());
     }
 
     private void insertFiFromFile() {
@@ -77,6 +73,7 @@ public class UIController {
         }
         try {
             initEstDec();
+            appendToLogArea("d = " + algorithm.getD());
         } catch (IllegalArgumentException e) {
             appendToLogArea(e.getMessage());
             return;

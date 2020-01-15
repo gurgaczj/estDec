@@ -6,29 +6,29 @@ import java.util.Set;
 
 public class FrequentItemset {
 
-    private BigDecimal support;
+    private String support;
     private Set<String> itemset;
-    private BigDecimal error;
+    private String error;
 
     public FrequentItemset(double support, String[] items, double error) {
-        this.support = new BigDecimal(support);
+        this.support = new BigDecimal(support).toString();
         this.itemset = toSet(items);
-        this.error = new BigDecimal(error);
+        this.error = new BigDecimal(error).toString();
     }
 
-    public BigDecimal getSupport() {
+    public String getSupport() {
         return support;
     }
 
-    public void setSupport(BigDecimal support) {
+    public void setSupport(String support) {
         this.support = support;
     }
 
-    public BigDecimal getError() {
+    public String getError() {
         return error;
     }
 
-    public void setError(BigDecimal error) {
+    public void setError(String error) {
         this.error = error;
     }
 

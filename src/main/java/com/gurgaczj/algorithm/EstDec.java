@@ -23,6 +23,10 @@ public class EstDec {
     }
 
     public void processTransaction(Collection<String> transaction) {
+        if(transaction.size() > 30){
+            return;
+        }
+
         Set<Set<String>> itemsetPowerSet = Sets.powerSet(new LinkedHashSet<>(transaction))
                 .stream()
                 .filter(subSet -> subSet.size() != 0)
