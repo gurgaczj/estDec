@@ -86,7 +86,11 @@ public class UIController {
 
         File csv = fileChooser.showOpenDialog(rootPane.getScene().getWindow());
 
-
+        if(csv == null){
+            appendToLogArea("Nie wybrano pliku");
+            return;
+        }
+        
         String regex;
         TextInputDialog textInputDialog = new TextInputDialog();
         textInputDialog.setTitle("Podaj delimiter");
@@ -181,6 +185,10 @@ public class UIController {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Zły format dla sIns");
         }
+        
+        if(sIns >= sMin){
+            throw new IllegalArgumentException("Sins powinno być mniejsze od Smin");
+        }
 
         double sPrn;
         try {
@@ -190,6 +198,10 @@ public class UIController {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Zły format dla sPrn");
         }
+        
+        if(sPrn >= sMin){
+            throw new IllegalArgumentException("Sprn powinno być mniejsze od Smin");
+        }      
 
         this.algorithm = new EstDec(sMin, sIns, sPrn);
 
